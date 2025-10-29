@@ -1,6 +1,6 @@
 <template>
   <main>
-    <body>
+   
       <div class="container-fluid p-0">
         <div class="row g-0">
           <div class="col-1 app" style="min-height: 100vh;">
@@ -223,7 +223,7 @@
           </div>
         </div>
       </div>
-    </body>
+    
   </main>
 </template>
 
