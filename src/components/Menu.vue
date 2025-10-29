@@ -74,12 +74,12 @@ export default {
         "/topology-links",
         "/notification-center",
         "website-monitoring",
-        null, // Downtime Notes
+        "/downtime-notes",
         null, // Device Management
-        null, // SLA Management
-        null, // MRTG Device Manager
+        "/sla-management", // SLA Management
+        "/mrtg-device", // MRTG Device Manager
         "/user-profile",
-        null, // About NOC Dashboard
+        "/about-noc", // About NOC Dashboard
         null, // Logout
       ],
     };
@@ -88,12 +88,23 @@ export default {
     setActive(index) {
       this.activeIndex = index;
       const targetRoute = this.routes[index];
+      // if (targetRoute) {
+      //   this.$router.push(targetRoute);
+      // }
+      // else {
+      //   alert(`${this.tooltips[index]} is not available yet.`);
+      // }
+      if (this.tooltips[index] === "About NOC Dashboard") {
+        // Access global modal instance in App.vue
+        this.$root.$refs.aboutModal.openModal();
+        return;
+      }
+
       if (targetRoute) {
         this.$router.push(targetRoute);
-      }
-      else {
+      } else {
         alert(`${this.tooltips[index]} is not available yet.`);
-      }
+      } 
     },
     showTooltip(index) {
       this.tooltipIndex = index;

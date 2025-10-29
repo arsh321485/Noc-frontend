@@ -1,8 +1,13 @@
-<script setup lang="ts">
+<script >
 import { RouterLink, RouterView } from 'vue-router'
+import AboutNocModal from "@/components/AboutNocModal.vue";
+export default {
+  components: { AboutNocModal },
+};
 </script>
 
 <template>
+  <AboutNocModal ref="aboutModal" />
   <RouterView />
 </template>
 
