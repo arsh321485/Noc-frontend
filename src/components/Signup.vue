@@ -15,7 +15,7 @@
               type="text"
               class="form-control"
               placeholder="Enter first name"
-              required
+              
             />
           </div>
 
@@ -27,7 +27,7 @@
               type="text"
               class="form-control"
               placeholder="Enter last name"
-              required
+              
             />
           </div>
 
@@ -39,7 +39,7 @@
               type="email"
               class="form-control"
               placeholder="Enter email address"
-              required
+              
             />
           </div>
 
@@ -51,14 +51,14 @@
               type="text"
               class="form-control"
               placeholder="Enter username"
-              required
+              
             />
           </div>
 
           <!-- Role -->
           <div class="col-12">
             <label class="form-label">Role</label>
-            <select v-model="form.role" class="form-select" required>
+            <select v-model="form.role" class="form-select" >
               <option value="" disabled>Select role</option>
               <option value="admin">Admin</option>
               <option value="user">User</option>
@@ -74,7 +74,7 @@
               type="password"
               class="form-control"
               placeholder="Enter password"
-              required
+              
             />
           </div>
 
@@ -86,7 +86,7 @@
               type="password"
               class="form-control"
               placeholder="Confirm password"
-              required
+              
             />
           </div>
 
@@ -102,7 +102,8 @@
       <!-- Login Redirect -->
       <p class="text-center mt-4">
         Already have an account?
-        <a href="/login" class="text-gradient fw-bold">Login here</a>
+        <!-- <a href="/login" class="text-gradient fw-bold">Login here</a> -->
+        <router-link to="/system" class="text-gradient fw-bold text-decoration-none">Login here</router-link>
       </p>
     </div>
   </div>

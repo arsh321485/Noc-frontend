@@ -73,7 +73,7 @@ const router = createRouter({
       component: MrtgdeviceView,
     },
     {
-      path: '/system',
+      path: '/',
       name: 'system',
       component: SystemView,
     },
