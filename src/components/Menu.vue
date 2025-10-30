@@ -23,8 +23,9 @@
   </div>
 </template>
 
-
 <script>
+import Swal from "sweetalert2";
+
 export default {
   name: "Menu",
   data() {
@@ -66,10 +67,10 @@ export default {
         "Logout",
       ],
       routes: [
-        null, // NOC Dashboard
+        "/system", // NOC Dashboard
         null, // Dashboard
-        null, // Device Monitoring
-        null, // Network Topology
+        "device-monitor", // Device Monitoring
+        "/network-topology", // Network Topology
         "/rrd-integration",
         "/topology-links",
         "/notification-center",
@@ -85,26 +86,73 @@ export default {
     };
   },
   methods: {
-    setActive(index) {
+    // setActive(index) {
+    //   this.activeIndex = index;
+    //   const targetRoute = this.routes[index];
+      
+    //   if (this.tooltips[index] === "About NOC Dashboard") {
+    //     this.$root.$refs.aboutModal.openModal();
+    //     return;
+    //   }
+
+    //   if (targetRoute) {
+    //     this.$router.push(targetRoute);
+    //   } else {
+    //     alert(`${this.tooltips[index]} is not available yet.`);
+    //   } 
+    // },
+    async setActive(index) {
       this.activeIndex = index;
       const targetRoute = this.routes[index];
-      // if (targetRoute) {
-      //   this.$router.push(targetRoute);
-      // }
-      // else {
-      //   alert(`${this.tooltips[index]} is not available yet.`);
-      // }
+
+      // ✅ Handle "About NOC Dashboard"
       if (this.tooltips[index] === "About NOC Dashboard") {
-        // Access global modal instance in App.vue
         this.$root.$refs.aboutModal.openModal();
         return;
       }
 
+      // ✅ Handle "Logout"
+      if (this.tooltips[index] === "Logout") {
+        const result = await Swal.fire({
+          title: "Are you sure you want to logout?",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#667eea",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Yes, Logout",
+          cancelButtonText: "No, Cancel",
+          background: "rgba(28,27,48,0.95)",
+          color: "#fff",
+          backdrop: `rgba(0,0,0,0.7)`,
+        });
+
+        if (result.isConfirmed) {
+          await Swal.fire({
+            icon: "success",
+            title: "Logged out successfully",
+            timer: 1500,
+            showConfirmButton: false,
+            background: "rgba(28,27,48,0.95)",
+            color: "#fff",
+          });
+          this.$router.push("/login");
+        }
+        return; 
+      }
+
+      // ✅ Normal route navigation
       if (targetRoute) {
         this.$router.push(targetRoute);
       } else {
-        alert(`${this.tooltips[index]} is not available yet.`);
-      } 
+        Swal.fire({
+          icon: "info",
+          title: `${this.tooltips[index]} is not available yet.`,
+          timer: 1500,
+          showConfirmButton: false,
+          background: "rgba(28,27,48,0.95)",
+          color: "#fff",
+        });
+      }
     },
     showTooltip(index) {
       this.tooltipIndex = index;

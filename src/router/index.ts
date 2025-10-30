@@ -7,10 +7,31 @@ import UserProfileView from '@/views/UserProfileView.vue'
 import DowntimenotesView from '@/views/DowntimenotesView.vue'
 import SLAManagementView from '@/views/SLAManagementView.vue'
 import MrtgdeviceView from '@/views/MrtgdeviceView.vue'
+import Signup from '@/components/Signup.vue'
+import Forgetpassword from '@/components/Forgetpassword.vue'
+import Login from '@/components/Login.vue'
+import SystemView from '@/views/SystemView.vue'
+import NetworktopologyView from '@/views/NetworktopologyView.vue'
+import DevicemonitorView from '@/views/DevicemonitorView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/signup',
+      name: 'signup',
+      component: Signup,
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: Login,
+    },
+    {
+      path: '/forgetpassword',
+      name: 'forgetpassword',
+      component: Forgetpassword,
+    },
     {
       path: '/topology-links',
       name: 'topology-links',
@@ -51,7 +72,21 @@ const router = createRouter({
       name: 'mrtg-device',
       component: MrtgdeviceView,
     },
-
+    {
+      path: '/system',
+      name: 'system',
+      component: SystemView,
+    },
+    {
+      path: '/network-topology',
+      name: 'network-topology',
+      component: NetworktopologyView,
+    },
+    {
+      path: '/device-monitor',
+      name: 'device-monitor',
+      component: DevicemonitorView,
+    },
   ],
 })
 
