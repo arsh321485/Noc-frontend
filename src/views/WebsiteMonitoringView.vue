@@ -93,7 +93,7 @@
             <!-- Donut Chart -->
             <div class="col-12 col-lg-6 d-flex justify-content-center">
               <div class="chart-container">
-                <h6 class="text-center">Website Status</h6>
+                <!-- <h6 class="text-center">Website Status</h6> -->
                 <canvas id="statusChart"></canvas>
               </div>
             </div>

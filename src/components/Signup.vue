@@ -92,9 +92,10 @@
 
           <!-- Submit Button -->
           <div class="col-12 text-center mt-4">
-            <button type="submit" class="btn-signup px-5 py-2">
+            <!-- <button type="submit" class="btn-signup px-5 py-2">
               <i class="fas fa-user-check me-2"></i> Sign Up
-            </button>
+            </button> -->
+            <router-link to="/system" class="btn-signup px-5 py-2 text-decoration-none"><i class="fas fa-user-check me-2"></i> Sign Up</router-link>
           </div>
         </div>
       </form>
@@ -103,7 +104,7 @@
       <p class="text-center mt-4">
         Already have an account?
         <!-- <a href="/login" class="text-gradient fw-bold">Login here</a> -->
-        <router-link to="/system" class="text-gradient fw-bold text-decoration-none">Login here</router-link>
+        <router-link to="/login" class="text-gradient fw-bold text-decoration-none">Login here</router-link>
       </p>
     </div>
   </div>

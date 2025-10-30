@@ -45,9 +45,10 @@
 
           <!-- Submit Button -->
           <div class="col-12 text-center mt-4">
-            <button type="submit" class="btn-signup px-5 py-2">
+            <!-- <button type="submit" class="btn-signup px-5 py-2">
               <i class="fas fa-sign-in-alt me-2"></i> Login
-            </button>
+            </button> -->
+            <router-link to="/system" class="btn-signup px-5 py-2 text-decoration-none"><i class="fas fa-sign-in-alt me-2"></i> Login</router-link>
           </div>
         </div>
       </form>
@@ -55,7 +56,8 @@
       <!-- Signup Redirect -->
       <p class="text-center mt-4">
         Don’t have an account?
-        <a href="/signup" class="text-gradient fw-bold">Create one</a>
+        <!-- <a href="/signup" class="text-gradient fw-bold">Create one</a> -->
+         <router-link to="/" class="text-gradient fw-bold text-decoration-none">Create one</router-link>
       </p>
     </div>
   </div>
