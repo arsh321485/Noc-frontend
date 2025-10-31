@@ -1,6 +1,6 @@
 <template>
   <main>
-   
+      <div class="downtime-notes">
       <div class="container-fluid p-0">
         <div class="row g-0">
           <div class="col-1 app" style="min-height: 100vh;">
@@ -11,7 +11,7 @@
             <div class="main-content">
               <div class="page-header">
                 <h1><i class="fas fa-sticky-note"></i> Downtime Notes</h1>
-                <p>Track and manage system downtime incidents and maintenance records</p>
+                <p class="text-light">Track and manage system downtime incidents and maintenance records</p>
 
                 <a href="device-management-2.html" class="btn-backtodevice">
                   <i class="fas fa-arrow-left"></i> Back to Device Management
@@ -223,11 +223,12 @@
           </div>
         </div>
       </div>
-    
+      </div>
   </main>
 </template>
 
 <script>
+import '../assets/main.css'
 import Menu from '@/components/Menu.vue';
 import { ref, computed, onMounted } from "vue";
 
@@ -405,12 +406,12 @@ export default {
   margin-top: 12px;
 }
 
-.app {
-    /* background: linear-gradient(135deg, #141e30, #243b55); */
+/* .app {
+    background: linear-gradient(135deg, #141e30, #243b55);
     background-color: rgb(52, 32, 60);
     color: #fff;
     min-height: 100vh;
-}
+} */
 
 .page-header h1 {
     color: #8ab6ff;

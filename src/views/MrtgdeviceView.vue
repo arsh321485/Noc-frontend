@@ -289,6 +289,7 @@
 </template>
 
 <script>
+import '../assets/main.css'
 import Menu from '@/components/Menu.vue';
 
 export default {
@@ -433,11 +434,11 @@ removeToast(index) {
     transform: translateY(-4px);
     background: rgba(91, 127, 255, 0.12);
 }
-.app {
+/* .app {
     background-color: rgb(73, 43, 77);
     color: #fff;
     min-height: 100vh;
-}
+} */
 .text-primary {
     color: #6b82f6 !important;
 }

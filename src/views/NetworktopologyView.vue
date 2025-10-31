@@ -66,6 +66,7 @@
 </template>
 
 <script lang="ts">
+import '../assets/main.css'
 import Menu from '@/components/Menu.vue';
 import { defineComponent, ref, onMounted } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -120,11 +121,11 @@ export default defineComponent({
 
 <style scoped>
 /* === PAGE === */
-.network-topology {
+/* .network-topology {
   color: #fff;
   background: radial-gradient(circle at 20% 80%, #1a1733 0%, #241739 40%, #1a1331 100%);
   min-height: 100vh;
-}
+} */
 
 /* === HEADER === */
 h4 {

@@ -324,6 +324,7 @@
 
 
 <script>
+import '../assets/main.css'
 import Menu from '@/components/Menu.vue';
 import Chart from "chart.js/auto";
 
@@ -617,11 +618,11 @@ export default {
     margin-right: 50px;
 }
 
-.app {
+/* .app {
     background-color: rgb(19, 19, 41);
     color: #fff;
     min-height: 100vh;
-}
+} */
 
 /* ✅ Make all headings visible on dark background */
 

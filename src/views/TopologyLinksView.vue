@@ -173,6 +173,7 @@
 </template>
 
 <script>
+import '../assets/main.css'
 import Menu from '@/components/Menu.vue';
 
 export default {
@@ -272,7 +273,7 @@ export default {
 </script>
 
 <style scoped>
-.topology {
+/* .topology {
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.15);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -282,7 +283,7 @@ export default {
   --text-secondary: rgba(255, 255, 255, 0.8);
   --text-muted: rgba(255, 255, 255, 0.6);
   --bg-main: linear-gradient(180deg, #1a1333, #23193d);
-}
+} */
 
 /* ===== Main Container ===== */
 .topology .main-content {

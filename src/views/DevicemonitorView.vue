@@ -152,6 +152,7 @@
 </template>
 
 <script lang="ts">
+import '../assets/main.css'
 import Menu from '@/components/Menu.vue';
 import { defineComponent } from "vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -278,7 +279,7 @@ export default defineComponent({
 </script>
 
 <style scoped>
-.device-monitoring {
+/* .device-monitoring {
   min-height: 100vh;
   background: linear-gradient(
     120deg,
@@ -290,7 +291,7 @@ export default defineComponent({
   padding: 48px 4%;
   color: #e9e6f5;
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
-}
+} */
 
 /* Header */
 .page-header {

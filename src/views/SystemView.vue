@@ -1,5 +1,5 @@
 <template>
-  <div class="container-fluid dashboard-page  py-4">
+  <div class="container-fluid dashboard-page py-4">
     <div class="row">
       <div class="col-1">
         <Menu />
@@ -7,7 +7,7 @@
       <div class=" px-5 col-11 ">
           <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-      <div class="dashboard-header  mb-3 mb-md-0">
+      <div class="  mb-3 mb-md-0">
         <h1><FontAwesomeIcon :icon="['fas', 'tachometer-alt']" class="icon" /> NOC Dashboard</h1>
       </div>
 
@@ -106,7 +106,7 @@ export default defineComponent({
 
 <style scoped>
 .dashboard-page {
-   background-color: #1e1633; /* Deep purple shade */
+  /* background-color: #1e1633;  */
   color: #ffffff;
   min-height: 100vh;
 }
