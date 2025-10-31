@@ -67,7 +67,6 @@
       <!-- Heading -->
       <div class="notification-title d-flex align-items-center justify-content-between mb-3">
         <h4><i class="fas fa-table me-2"></i> Network Status Notifications</h4>
-
         <div class="d-flex align-items-center gap-2">
           <button class="export-btn" @click="exportToExcel">
             <i class="fas fa-download"></i> Export
@@ -77,7 +76,7 @@
           </button>
         </div>
       </div>
-
+      
       <!-- Connection Status -->
       <div class="connection-status d-flex justify-content-between align-items-center mb-3">
         <div class="status-text">
@@ -144,6 +143,12 @@
       </div>
 
       </div>
+      <!-- Floating Alert -->
+              <div v-if="alertMessage" class="notification-alert" :class="alertType">
+                <i :class="alertIcon"></i>
+                <span class="text-light">{{ alertMessage }}</span>
+                <button class="notification-close-btn" @click="closeAlert">×</button>
+              </div>
         </div>
       </div>
     </div>
@@ -153,6 +158,7 @@
 <script>
 import Menu from '@/components/Menu.vue';
 import * as XLSX from "xlsx";
+import Swal from "sweetalert2";
 
 export default {
   name: "NotificationCenterView",
@@ -222,6 +228,15 @@ export default {
           time: "Just now",
         },
       ],
+      alert: {
+      show: false,
+      type: "",
+      message: "",
+    },
+    alertMessage: "",
+      alertType: "",
+      alertIcon: "",
+      alertTimeout: null,
     };
   },
   computed: {
@@ -257,13 +272,76 @@ export default {
       XLSX.utils.book_append_sheet(workbook, worksheet, "Notifications");
       XLSX.writeFile(workbook, "Network_Notifications.xlsx");
     },
+    showAlert(message, type = "info") {
+      this.alertMessage = message;
+      this.alertType = type;
+      this.alertIcon =
+        type === "success" ? "fas fa-check-circle" : "fas fa-info-circle";
+      clearTimeout(this.alertTimeout);
+      this.alertTimeout = setTimeout(() => {
+        this.alertMessage = "";
+      }, 4000);
+    },
+    closeAlert() {
+      this.alertMessage = "";
+      clearTimeout(this.alertTimeout);
+    },
     confirmClearHistory() {
-      alert("⚠️ Are you sure you want to delete notification history?");
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Are you sure want to delete Notification history?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        background: "#1c1630", 
+        color: "#fff",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.deleteHistory(); 
+        }
+      });
+    },
+    deleteHistory() {
+      this.showAlert("Notification history deleted", "error");
     },
     viewDetails(notification) {
-      alert(
-        `Device: ${notification.device}\nIP: ${notification.ip}\nStatus: ${notification.status}\nMessage: ${notification.message}\nTime: ${notification.time}`
-      );
+      let statusColor = "#4CAF50"; 
+      if (notification.status === "Offline") statusColor = "#e74c3c";
+      else if (notification.status === "Pending") statusColor = "#f1c40f";
+      Swal.fire({
+        title: "Notification Details",
+        html: `
+          <div style="text-align: left; font-size: 15px; line-height: 1.6;">
+            <p><b>Priority:</b> ${notification.priority}</p>
+            <p><b>Device:</b> ${notification.device}</p>
+            <p><b>IP:</b> ${notification.ip}</p>
+            <p><b>Site:</b> ${notification.site}</p>
+            <p><b>Status:</b> 
+              <span style="
+                color: #fff;
+                background: ${statusColor};
+                padding: 2px 8px;
+                border-radius: 6px;
+                font-size: 13px;
+              ">
+                ${notification.status}
+              </span>
+            </p>
+            <p><b>Message:</b> ${notification.message}</p>
+            <p><b>Time:</b> ${notification.time}</p>
+          </div>
+        `,
+        icon: "info",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#3085d6",
+        background: "#1c1630", 
+        color: "#fff",
+        showCloseButton: true,
+        allowOutsideClick: false,
+      });
     },
   },
   mounted() {
@@ -274,20 +352,51 @@ export default {
 </script>
 
 <style scoped>
-.notification {
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --bg-main: linear-gradient(180deg, #1a1333, #23193d);
+.notification .notification-alert {
+  position: fixed;
+  top: 20px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(40, 40, 60, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  animation: slideIn 0.4s ease forwards;
 }
 
-/* ===== Main Container ===== */
+.notification .notification-alert i {
+  font-size: 18px;
+}
 
+.notification .notification-alert.success {
+  border-left: 5px solid #4caf50;
+}
+
+.notification .notification-alert.info {
+  border-left: 5px solid #2196f3;
+}
+
+.notification .notification-alert.warning {
+  border-left: 5px solid #fbc02d; 
+}
+
+.notification .notification-alert.error {
+  border-left: 5px solid #f44336;
+}
+
+.notification .notification-close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  margin-left: 10px;
+}
 
 .notification .dashboard {
   background: var(--bg-main);

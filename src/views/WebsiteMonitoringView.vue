@@ -330,6 +330,7 @@
 
 <script>
 import Menu from '@/components/Menu.vue';
+import Swal from "sweetalert2";
 import * as XLSX from "xlsx";
 import { Chart, DoughnutController, ArcElement, Tooltip, Legend, LineController, LineElement, PointElement, LinearScale, CategoryScale } from "chart.js";
 Chart.register(DoughnutController, ArcElement, Tooltip, Legend, LineController, LineElement, PointElement, LinearScale, CategoryScale);
@@ -402,12 +403,15 @@ export default {
       this.showAlert("Refreshing all websites", "info");
     },
     exportWebsiteData() {
-      const worksheet = XLSX.utils.json_to_sheet(this.websiteData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Websites");
-      XLSX.writeFile(workbook, "Website_Monitoring_Data.xlsx");
-
-      this.showAlert("Monitoring data exported successfully", "success");
+    if (!this.websitesData.length) {
+      this.showAlert("There is no data present for export", "error");
+      return;
+    }
+    const worksheet = XLSX.utils.json_to_sheet(this.websitesData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Websites");
+    XLSX.writeFile(workbook, "Website_Monitoring_Data.xlsx");
+    this.showAlert("Monitoring data exported successfully", "success");
     },
     createCharts() {
       // Donut Chart
@@ -481,14 +485,22 @@ export default {
     handleResize() {
     },
     testConnection() {
-      alert("🔍 Testing connection for " + this.website.url);
+      this.showAlert("Testing connection...", "info");
     },
     addWebsite() {
       if (!this.website.name || !this.website.url) {
-        alert("⚠️ Please enter both Website Name and URL!");
+        Swal.fire({
+          icon: "warning",
+          title: "Missing Information",
+          text: "Please enter both Website Name and URL!",
+          showConfirmButton: false,
+          timer: 2000,
+          timerProgressBar: true,
+          background: "#1c1630",
+          color: "#fff",
+        });
         return;
       }
-
       this.websitesData.push({
         name: this.website.name,
         responseTime: "N/A",
@@ -498,9 +510,7 @@ export default {
         status: "Offline",
         description: this.website.description || "No description available.",
       });
-
-      alert(`✅ Website added successfully: ${this.website.name}`);
-
+      this.showAlert(`Website "${this.website.name}" added successfully`, "success");
       this.website = {
         name: "",
         url: "",
@@ -515,45 +525,79 @@ export default {
       setTimeout(() => this.closeAlert(), 3000);
     },
     confirmClearAll() {
-    if (confirm("⚠️ Are you sure you want to delete all websites?")) {
-      this.websitesData = [];
-      this.showAlert("All websites deleted successfully", "success", "fas fa-check-circle");
-    } else {
-      this.showAlert("Operation cancelled", "warning", "fas fa-exclamation-circle");
+    if (!this.websitesData || this.websitesData.length === 0) {
+      this.showAlert("There is no data to delete", "error");
+      return;
     }
-    setTimeout(() => this.closeAlert(), 3000);
+    Swal.fire({
+      title: "Are you sure?",
+      text: "Are you sure want to delete all websites?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "No",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      background: "#1c1630", 
+      color: "#fff",
+      showCloseButton: true,
+      allowOutsideClick: false,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.websitesData = [];
+        this.showAlert(
+          "All websites deleted successfully",
+          "success",
+          "fas fa-check-circle"
+        );
+      }
+    });
     },
     viewSite(site) {
-      alert(`🌐 Viewing: ${site.name}\nStatus: ${site.status}\nResponse: ${site.responseTime}ms`);
+  Swal.fire({
+    title: `Viewing: ${site.name}`,
+    html: `
+      <p><b>Status:</b> ${site.status}</p>
+      <p><b>Response Time:</b> ${site.responseTime} ms</p>
+      <p><b>Uptime:</b> ${site.uptime || "N/A"}</p>
+      <p><b>Last Check:</b> ${site.lastCheck || "Just now"}</p>
+    `,
+    icon: "info",
+    confirmButtonText: "OK",
+    showCloseButton: true,
+    background: "#1c1630",
+    color: "#fff",
+    confirmButtonColor: "#3085d6",
+  });
     },
     editSite(site) {
-      alert(`✏️ Edit details for: ${site.name}`);
+      this.showAlert("Editing details...", "warning");
     },
     deleteSite(index) {
-      const confirmDelete = confirm("🗑️ Are you sure you want to delete this website?");
-    if (confirmDelete) {
-      this.websitesData.splice(index, 1);
-    }
-    },
+    const siteName = this.websitesData[index].name; 
+    Swal.fire({
+      title: "Are you sure?",
+      text: `Do you really want to delete "${siteName}"?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it",
+      cancelButtonText: "Cancel",
+      background: "#1c1630",
+      color: "#fff",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.websitesData.splice(index, 1);
+        this.showAlert(`Website "${siteName}" deleted successfully`, "error");
+      }
+    });
+  },
   },
 }
 </script>
 
 <style scoped>
-.web-monitoring {
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --bg-main: linear-gradient(180deg, #1a1333, #23193d);
-}
-
-
-
 .web-monitoring .dashboard {
   background: var(--bg-main);
   color: var(--text-primary);
@@ -671,6 +715,14 @@ export default {
 
 .web-monitoring .web-monitoring-alert.info {
   border-left: 5px solid #2196f3;
+}
+
+.web-monitoring .web-monitoring-alert.warning {
+  border-left: 5px solid #fbc02d;
+}
+
+.web-monitoring .web-monitoring-alert.error {
+  border-left: 5px solid #f44336; 
 }
 
 .web-monitoring .web-monitoring-close-btn {
@@ -1084,7 +1136,7 @@ export default {
 .web-monitoring .no-data i {
   font-size: 36px;
   margin-bottom: 10px;
-  display: block;
+  /* display: block; */
 }
 
 /* Scrollbar style */

@@ -4,7 +4,7 @@
       <div class="row me-0">
         <!-- Sidebar -->
         <div class="col-1">
-            <Menu />
+          <Menu />
         </div>
 
         <!-- Main -->
@@ -124,14 +124,19 @@
               <h5 class="section-title mb-2 mb-md-0">
                 <i class="fas fa-exclamation-triangle me-2"></i> Active SLA Violations
               </h5>
-              <div>
-                <button class="btn btn-danger me-2 mb-2 mb-md-0" @click="resolveAll">
+
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <button class="btn btn-danger d-flex align-items-center" @click="resolveAll">
                   <i class="fas fa-check me-1"></i> Resolve All Violations
                 </button>
-                <button class="btn btn-gradient mb-2 mb-md-0" @click="refreshViolations">
-                  <i class="fas fa-sync-alt me-1"></i> Refresh
+
+                <button class="btn btn-gradient d-flex align-items-center" @click="refreshViolations"
+                  :disabled="isRefreshing">
+                  <i class="fas fa-sync-alt me-1" :class="{ spin: isRefreshing }"></i>
+                  {{ isRefreshing ? 'Refreshing...' : 'Refresh' }}
                 </button>
               </div>
+
             </div>
 
             <div class="add-violation-form mb-4">
@@ -189,7 +194,8 @@
                       <td class="text-white">{{ v.service }}</td>
                       <td class="text-white"><span class="badge bg-warning text-dark">{{ v.category }}</span></td>
                       <td class="text-white">{{ v.type }}</td>
-                      <td class="text-white"><span :class="['badge', severityClass(v.severity)]">{{ v.severity }}</span></td>
+                      <td class="text-white"><span :class="['badge', severityClass(v.severity)]">{{ v.severity }}</span>
+                      </td>
                       <td class="text-white">{{ v.status }}</td>
                       <td class="text-white">{{ v.duration }}</td>
                       <td>
@@ -249,7 +255,8 @@
                   <tr v-for="r in resolvedViolations" :key="r.id" class="resolved-row">
                     <td class="text-white">{{ r.service }}</td>
                     <td class="text-white">{{ r.violationType }}</td>
-                    <td class="text-white"><span :class="['badge', severityClass(r.severity)]">{{ r.severity }}</span></td>
+                    <td class="text-white"><span :class="['badge', severityClass(r.severity)]">{{ r.severity }}</span>
+                    </td>
                     <td class="text-white">{{ r.duration }}</td>
                     <td class="text-white">{{ r.resolvedAt }}</td>
                     <td class="text-white">{{ r.resolvedBy }}</td>
@@ -287,38 +294,22 @@
     </div>
 
     <!-- 🔔 Notification Toasts -->
+
+
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
-      <div
-        v-for="(toast, index) in toasts"
-        :key="index"
-        class="toast align-items-center text-white border-0 show fade"
-        :class="{
-          'bg-success': toast.type === 'success',
-          'bg-danger': toast.type === 'error',
-          'bg-warning': toast.type === 'warning',
-          'bg-info': toast.type === 'info'
-        }"
-        role="alert"
-        aria-live="assertive"
-        aria-atomic="true"
-      >
-        <div class="d-flex">
-          <div class="toast-body">
-            <i v-if="toast.type === 'success'" class="fas fa-check-circle me-2"></i>
-            <i v-if="toast.type === 'error'" class="fas fa-exclamation-circle me-2"></i>
-            <i v-if="toast.type === 'info'" class="fas fa-info-circle me-2"></i>
-            <i v-if="toast.type === 'warning'" class="fas fa-exclamation-triangle me-2"></i>
-            {{ toast.message }}
-          </div>
-          <button
-            type="button"
-            class="btn-close btn-close-white me-2 m-auto"
-            @click="removeToast(index)"
-            aria-label="Close"
-          ></button>
+      <div v-for="(toast, index) in toasts" :key="index" class="modern-toast" :class="toast.type">
+        <div class="toast-left-bar"></div>
+        <div class="toast-content">
+          <i v-if="toast.type === 'success'" class="fas fa-check-circle icon"></i>
+          <i v-if="toast.type === 'error'" class="fas fa-exclamation-circle icon"></i>
+          <i v-if="toast.type === 'info'" class="fas fa-info-circle icon"></i>
+          <i v-if="toast.type === 'warning'" class="fas fa-exclamation-triangle icon"></i>
+          <span class="toast-message">{{ toast.message }}</span>
         </div>
+        <button class="toast-close" @click="removeToast(index)">×</button>
       </div>
     </div>
+
   </main>
 </template>
 
@@ -339,6 +330,8 @@ export default {
       donutInstance: null,
       lineInstance: null,
       toasts: [], // ✅ Toast notifications
+      isRefreshing: false,
+
 
       metrics: [
         { label: "OVERALL COMPLIANCE", icon: "fas fa-check-circle", color: "text-success", value: "99.2%", loading: false },
@@ -538,8 +531,23 @@ export default {
       this.showToast("Configuration reset to default!", "info");
     },
     refreshViolations() {
-      this.showToast("Failed to refresh topology numbers!", "error");
+      if (this.isRefreshing) return; // prevent multiple clicks
+      this.isRefreshing = true;
+
+      this.showToast("🔄 Refreshing SLA data...", "info");
+
+      setTimeout(() => {
+        // simulate data reloading or re-fetching
+        this.loadingViolations = true;
+
+        setTimeout(() => {
+          this.loadingViolations = false;
+          this.isRefreshing = false;
+          this.showToast("✅ Refreshed successfully!", "success");
+        }, 1000);
+      }, 400);
     },
+
     resolveAll() {
       this.activeViolations = [];
       this.showToast("All violations resolved!", "success");
@@ -580,423 +588,485 @@ export default {
   padding: 30px;
 }
 
-.toast {
-  opacity: 0;
-  transform: translateX(100%);
-  animation: slideIn 0.4s ease forwards;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  border-radius: 8px;
+/* 🌙 Modern Dark Toast Style */
+.modern-toast {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: #1e1e2f;
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  min-width: 380px;
+  max-width: 400px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  animation: slideInRight 0.4s ease forwards;
 }
-@keyframes slideIn {
+
+/* 🔵 Colored left bar */
+.toast-left-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  border-radius: 8px 0 0 8px;
+}
+
+.modern-toast.success .toast-left-bar {
+  background-color: #4caf50;
+}
+
+.modern-toast.error .toast-left-bar {
+  background-color: #f44336;
+}
+
+.modern-toast.info .toast-left-bar {
+  background-color: #2196f3;
+}
+
+.modern-toast.warning .toast-left-bar {
+  background-color: #ff9800;
+}
+
+/* Toast content area */
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 14px;
+}
+
+/* Icons */
+.icon {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Message */
+.toast-message {
+  flex: 1;
+  font-weight: 500;
+  color: #fff;
+}
+
+/* Close button */
+.toast-close {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.2rem;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.toast-close:hover {
+  color: #fff;
+}
+
+/* Slide-in animation */
+@keyframes slideInRight {
   from {
     opacity: 0;
     transform: translateX(100%);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
   }
 }
-.toast-body {
-  font-size: 0.95rem;
-}
-.toast-container .toast + .toast {
-  margin-top: 12px;
-}
+
+
+
+
+
 .table {
-    background-color: rgba(221, 203, 203, 0.04);
-    --bs-table-bg: none;
+  background-color: rgba(221, 203, 203, 0.04);
+  --bs-table-bg: none;
 
 
 
 }
 
 .text-capitalize {
-    color: aliceblue;
+  color: aliceblue;
 }
 
 .home-btn {
-    background-color: white;
-    margin-right: 50px;
+  background-color: white;
+  margin-right: 50px;
 }
 
-/* .app {
-    background-color: rgb(19, 19, 41);
-    color: #fff;
-    min-height: 100vh;
-} */
-
-/* ✅ Make all headings visible on dark background */
-
-
-/* h2, h5, h6, .section-title {
-  color: #fff !important;
-} */
 
 .sla-title {
-    color: rgb(103, 117, 219);
-    font-weight: 700;
+  color: rgb(103, 117, 219);
+  font-weight: 700;
 }
 
 .sla-subtitle {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.95rem;
 }
 
 .glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-    margin-right: 50px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  margin-right: 50px;
 }
 
 .section-title {
-    font-weight: 600;
-    margin-bottom: 1rem;
-    color: #fff;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #fff;
 }
 
 .metric-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    padding: 14px;
-    color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 14px;
+  color: #fff;
 }
 
 .metric-icon {
-    font-size: 1.6rem;
-    margin-bottom: 6px;
+  font-size: 1.6rem;
+  margin-bottom: 6px;
 }
 
 .chart-container {
-    width: 100%;
-    max-width: 550px;
-    height: 220px;
-    margin: 0 auto;
+  width: 100%;
+  max-width: 550px;
+  height: 220px;
+  margin: 0 auto;
 }
 
 .legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
-    cursor: pointer;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  cursor: pointer;
 }
 
 .dot-green {
-    background: #2ecc71;
+  background: #2ecc71;
 }
 
 .dot-yellow {
-    background: #f1c40f;
+  background: #f1c40f;
 }
 
 .dot-red {
-    background: #e74c3c;
+  background: #e74c3c;
 }
 
 .report-card {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  color: #fff;
 }
 
 .btn-gradient {
-    background: linear-gradient(90deg, #5b7fff, #4facfe);
-    border: none;
-    color: #fff;
+  background: linear-gradient(90deg, #5b7fff, #4facfe);
+  border: none;
+  color: #fff;
 }
 
 .unit,
 .text-muted {
-    color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 @media (max-width: 768px) {
-    .sla-title {
-        font-size: 1.4rem;
-    }
+  .sla-title {
+    font-size: 1.4rem;
+  }
 
-    .chart-container {
-        height: 180px;
-    }
+  .chart-container {
+    height: 180px;
+  }
 }
 
 /* 🔹 Full-width responsive chart container for SLA Reports */
 .line-chart-container {
-    width: 100%;
-    height: 320px;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-    background: transparent;
-    position: relative;
+  width: 100%;
+  height: 320px;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  background: transparent;
+  position: relative;
 }
 
 /* Make chart fill the entire card */
 .line-chart-container canvas {
-    width: 100% !important;
-    height: 100% !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Subtle glow for data points */
 .line-chart-container canvas:hover {
-    transition: 0.3s;
-    filter: brightness(1.1);
+  transition: 0.3s;
+  filter: brightness(1.1);
 }
 
 /* Responsive adjustment */
 @media (max-width: 768px) {
-    .line-chart-container {
-        height: 240px;
-    }
+  .line-chart-container {
+    height: 240px;
+  }
 }
 
 
 
 /* 🔹 Compact single-line form styling */
 .add-violation-form {
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 10px;
-    padding: 12px 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  padding: 12px 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .add-violation-form input,
 .add-violation-form select {
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #fff;
-    min-width: 140px;
-    flex: 1 1 10%;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  min-width: 140px;
+  flex: 1 1 10%;
 }
 
 .add-violation-form input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .add-violation-form select option {
-    background: #1a1a2e;
-    color: #fff;
+  background: #1a1a2e;
+  color: #fff;
 }
 
 .add-violation-form button {
-    background: linear-gradient(90deg, #00c853, #009624);
-    border: none;
-    transition: 0.3s;
-    white-space: nowrap;
+  background: linear-gradient(90deg, #00c853, #009624);
+  border: none;
+  transition: 0.3s;
+  white-space: nowrap;
 }
 
 .add-violation-form button:hover {
-    filter: brightness(1.1);
+  filter: brightness(1.1);
 }
 
 /* Responsive tweak */
 @media (max-width: 992px) {
-    .add-violation-form .d-flex {
-        flex-wrap: wrap;
-    }
+  .add-violation-form .d-flex {
+    flex-wrap: wrap;
+  }
 
-    .add-violation-form input,
-    .add-violation-form select,
-    .add-violation-form button {
-        flex: 1 1 45%;
-    }
+  .add-violation-form input,
+  .add-violation-form select,
+  .add-violation-form button {
+    flex: 1 1 45%;
+  }
 }
 
 @media (max-width: 576px) {
 
-    .add-violation-form input,
-    .add-violation-form select,
-    .add-violation-form button {
-        flex: 1 1 100%;
-    }
+  .add-violation-form input,
+  .add-violation-form select,
+  .add-violation-form button {
+    flex: 1 1 100%;
+  }
 }
 
 
 
 /* Resolved Violations Table Styling */
 .table-dark-glass {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 10px;
-    border-collapse: separate;
-    border-spacing: 0 6px;
-    width: 100%;
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+  width: 100%;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.05);
 }
 
 .table-dark-glass thead th {
-    color: #a7b1ff;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.6px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a7b1ff;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .table-dark-glass tbody tr {
-    transition: 0.3s ease;
-    background: rgba(255, 255, 255, 0.04);
+  transition: 0.3s ease;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .table-dark-glass tbody tr:hover {
-    background: rgba(91, 127, 255, 0.12);
-    transform: scale(1.01);
-    box-shadow: 0 4px 20px rgba(91, 127, 255, 0.15);
+  background: rgba(91, 127, 255, 0.12);
+  transform: scale(1.01);
+  box-shadow: 0 4px 20px rgba(91, 127, 255, 0.15);
 }
 
 .table-dark-glass td,
 .table-dark-glass th {
-    padding: 10px 12px;
-    vertical-align: middle;
+  padding: 10px 12px;
+  vertical-align: middle;
 }
 
 .resolved-row {
-    border-radius: 8px;
-    animation: fadeIn 0.6s ease-in-out;
+  border-radius: 8px;
+  animation: fadeIn 0.6s ease-in-out;
 }
 
 /* Fade animation for new rows */
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Static full-width table (no scroll) */
 .static-table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
 }
 
 /* Adjust table styling */
 .table-dark-glass {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 10px;
-    border-collapse: collapse;
-    width: 100%;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  border-collapse: collapse;
+  width: 100%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .table-dark-glass thead th {
-    color: #a7b1ff;
-    text-transform: uppercase;
-    font-size: 0.85rem;
-    letter-spacing: 0.6px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 12px 14px;
+  color: #a7b1ff;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 14px;
 }
 
 .table-dark-glass tbody tr {
-    transition: 0.3s ease;
-    background: rgba(255, 255, 255, 0.04);
+  transition: 0.3s ease;
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .table-dark-glass tbody tr:hover {
-    background: rgba(91, 127, 255, 0.12);
-    transform: scale(1.005);
-    box-shadow: 0 4px 20px rgba(91, 127, 255, 0.15);
+  background: rgba(91, 127, 255, 0.12);
+  transform: scale(1.005);
+  box-shadow: 0 4px 20px rgba(91, 127, 255, 0.15);
 }
 
 .table-dark-glass td {
-    padding: 10px 14px;
-    word-wrap: break-word;
+  padding: 10px 14px;
+  word-wrap: break-word;
 }
 
 
 
 /* Add smooth fade animation for table rows */
 .resolved-row {
-    animation: fadeIn 0.6s ease-in-out;
+  animation: fadeIn 0.6s ease-in-out;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(6px);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
 /* 🔹 Align Performance Targets inputs properly */
 .config-card {
-    background: rgba(255, 255, 255, 0.04);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 .config-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 .label-text {
-    flex: 1 1 50%;
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 500;
-    font-size: 0.95rem;
+  flex: 1 1 50%;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 /* Input group box alignment */
 .input-group-config {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex: 0 0 120px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 0 0 120px;
 }
 
 /* Input styling */
 .config-input {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
-    border-radius: 6px;
-    width: 80px;
-    text-align: right;
-    transition: 0.3s;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 6px;
+  width: 80px;
+  text-align: right;
+  transition: 0.3s;
 }
 
 .config-input:focus {
-    border-color: #4facfe;
-    box-shadow: 0 0 6px rgba(79, 172, 254, 0.4);
+  border-color: #4facfe;
+  box-shadow: 0 0 6px rgba(79, 172, 254, 0.4);
 }
 
 /* Unit alignment */
 .unit {
-    min-width: 40px;
-    color: rgba(255, 255, 255, 0.7);
-    text-align: left;
-    font-size: 0.85rem;
+  min-width: 40px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: left;
+  font-size: 0.85rem;
 }
 
 /* Responsive fix for smaller screens */
 @media (max-width: 768px) {
-    .config-row {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+  .config-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
-    .input-group-config {
-        width: 100%;
-        justify-content: space-between;
-    }
+  .input-group-config {
+    width: 100%;
+    justify-content: space-between;
+  }
 
-    .config-input {
-        width: 100%;
-    }
+  .config-input {
+    width: 100%;
+  }
 }
 </style>

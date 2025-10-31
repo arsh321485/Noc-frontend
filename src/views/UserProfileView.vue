@@ -63,14 +63,14 @@
                     </div>
                 </div>
 
-                <!-- ✨ Edit Profile Modal -->
+                <!-- Edit Profile Modal -->
                 <div v-if="showEditModal" class="userprofile-editmodal-overlay">
                 <div class="userprofile-editmodal glass-editmodal">
                     <div class="userprofile-editmodal-body">
-                        <div class="userprofile-editmodal-header d-flex justify-content-between align-items-center">
+                      <div class="userprofile-editmodal-header d-flex justify-content-between align-items-center">
                     <h4>User Profile</h4>
                     <button class="userprofile-close-btn" @click="closeEditModal">×</button>
-                    </div>
+                      </div>
                     <h5 class="section-title">Personal Information</h5>
 
                     <div class="form-group">
@@ -92,6 +92,14 @@
                         <label>Role:</label>
                         <input type="text" v-model="editData.role" />
                     </div>
+
+                    <!-- Floating Alert -->
+        <div v-if="alertMessage" class="user-profile-alert" :class="alertType">
+          <i :class="alertIcon"></i>
+          <span>{{ alertMessage }}</span>
+          <button class="user-profile-close-btn" @click="closeAlert">×</button>
+        </div>
+
                     <div class="userprofile-editmodal-footer">
                     <button class="userprofile-save-btn" @click="saveProfile">
                         <i class="fas fa-save me-2"></i> Save Changes
@@ -155,6 +163,13 @@
                         <input type="password" v-model="passwordData.confirmPass" placeholder="Confirm new password" />
                     </div>
 
+                    <!-- Floating Alert -->
+        <div v-if="alertMessage" class="user-profile-alert" :class="alertType">
+          <i :class="alertIcon"></i>
+          <span>{{ alertMessage }}</span>
+          <button class="user-profile-close-btn" @click="closeAlert">×</button>
+        </div>
+
                     <div class="userprofile-changepassmodal-footer">
                         <button class="userprofile-save-btn" @click="savePassword">
                         <i class="fas fa-lock me-2"></i> Save Password
@@ -202,6 +217,13 @@
                         </button>
                     </div>
 
+                    <!-- Floating Alert -->
+        <div v-if="alertMessage" class="user-profile-alert" :class="alertType">
+          <i :class="alertIcon"></i>
+          <span>{{ alertMessage }}</span>
+          <button class="user-profile-close-btn" @click="closeAlert">×</button>
+        </div>
+
                     <!-- Footer Buttons -->
                     <div class="userprofile-sessionmodal-footer mt-3">
                         <button class="terminate-all-btn" @click="terminateAllSessions">
@@ -215,11 +237,11 @@
                 </div>
 
                 <!-- ✅ Top-right Alert -->
-                <div v-if="alert.visible" :class="['alert-box', alert.type]">
+                <!-- <div v-if="alert.visible" :class="['alert-box', alert.type]">
                     <i :class="alert.icon"></i>
                     <span>{{ alert.message }}</span>
                     <button class="alert-close" @click="alert.visible = false">×</button>
-                </div>
+                </div> -->
                 </div>
 
             </div>
@@ -264,9 +286,27 @@ export default {
       type: "",
       icon: "",
     },
+    alertMessage: "",
+    alertType: "",
+    alertIcon: "",
+    alertTimeout: null,
   };
 },
 methods: {
+  showAlert(message, type = "info") {
+      this.alertMessage = message;
+      this.alertType = type;
+      this.alertIcon =
+        type === "success" ? "fas fa-check-circle" : "fas fa-info-circle";
+      clearTimeout(this.alertTimeout);
+      this.alertTimeout = setTimeout(() => {
+        this.alertMessage = "";
+      }, 4000);
+  },
+  closeAlert() {
+      this.alertMessage = "";
+      clearTimeout(this.alertTimeout);
+  },
   openEditModal() {
     this.showEditModal = true;
   },
@@ -274,8 +314,10 @@ methods: {
     this.showEditModal = false;
   },
   saveProfile() {
-    console.log("Updated Profile:", this.editData);
+    this.showAlert("Profile Updated successfully!", "warning");
+    setTimeout(() => {
     this.showEditModal = false;
+  }, 1000);
   },
   openChangePassModal() {
     this.showChangePassModal = true;
@@ -284,16 +326,18 @@ methods: {
     this.showChangePassModal = false;
   },
   savePassword() {
-    if (!this.passwordData.current || !this.passwordData.newPass || !this.passwordData.confirmPass) {
-      alert("⚠️ Please fill all password fields.");
-      return;
-    }
-    if (this.passwordData.newPass !== this.passwordData.confirmPass) {
-      alert("❌ Passwords do not match!");
-      return;
-    }
-    console.log("Password changed successfully:", this.passwordData);
+  if (!this.passwordData.current || !this.passwordData.newPass || !this.passwordData.confirmPass) {
+    this.showAlert("Please fill all password fields.", "info");
+    return;
+  }
+  if (this.passwordData.newPass !== this.passwordData.confirmPass) {
+    this.showAlert("Passwords do not match!", "error");
+    return;
+  }
+  this.showAlert("Password changed successfully!", "success");
+  setTimeout(() => {
     this.showChangePassModal = false;
+  }, 1000);
   },
   openSessionModal() {
     this.showSessionModal = true;
@@ -302,25 +346,64 @@ methods: {
     this.showSessionModal = false;
   },
   terminateSession() {
-    this.showAlert("Session terminated successfully", "success", "fas fa-check-circle");
+    this.showAlert("Session terminated successfully", "success");
   },
   terminateAllSessions() {
-    this.showAlert("Terminated 1 session successfully", "success", "fas fa-check-circle");
+    this.showAlert("Terminated 1 session successfully", "success");
   },
   refreshSessions() {
-    this.showAlert("Refreshing sessions...", "success", "fas fa-sync-alt");
-  },
-  showAlert(message, type, icon) {
-    this.alert = { visible: true, message, type, icon };
-    setTimeout(() => (this.alert.visible = false), 3000);
+    this.showAlert("Refreshing sessions...", "info");
   },
 },
 }
 </script>
 
 <style scoped>
+.user-profile .user-profile-alert {
+  position: fixed;
+  top: 20px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(40, 40, 60, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  animation: slideIn 0.4s ease forwards;
+}
 
+.user-profile .user-profile-alert i {
+  font-size: 18px;
+}
 
+.user-profile .user-profile-alert.success {
+  border-left: 5px solid #4caf50;
+}
+
+.user-profile .user-profile-alert.info {
+  border-left: 5px solid #2196f3;
+}
+
+.user-profile .user-profile-alert.warning {
+  border-left: 5px solid #fbc02d; 
+}
+
+.user-profile .user-profile-alert.error {
+  border-left: 5px solid #f44336;
+}
+
+.user-profile .user-profile-close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  margin-left: 10px;
+}
 
 .user-profile .dashboard {
   background: var(--bg-main);

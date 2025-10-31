@@ -1,4 +1,4 @@
-<template>
+ <template>
   <div class="signup-page d-flex justify-content-center align-items-center">
     <div class="signup-card p-4 p-md-5 shadow-lg">
       <h2 class="text-center mb-4">
@@ -19,36 +19,35 @@
             />
           </div>
 
-          <!-- Password -->
-          <div class="col-12">
+          <!-- ✅ Password Field with Eye Toggle -->
+          <div class="col-12 position-relative">
             <label class="form-label">Password</label>
-            <input
-              v-model="form.password"
-              type="password"
-              class="form-control"
-              placeholder="Enter password"
-              required
-            />
-          </div>
+            <div class="password-container">
+              <input
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                class="form-control"
+                placeholder="Enter password"
+                required
+              />
+              <i
+                :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                class="toggle-password"
+                @click="showPassword = !showPassword"
+              ></i>
+            </div>
 
-          <!-- Confirm Password -->
-          <div class="col-12">
-            <label class="form-label">Confirm Password</label>
-            <input
-              v-model="form.confirmPassword"
-              type="password"
-              class="form-control"
-              placeholder="Confirm password"
-              required
-            />
+            <!-- ✅ Forgot Password Link -->
+            <div class="text-end mt-2">
+              <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+            </div>
           </div>
 
           <!-- Submit Button -->
           <div class="col-12 text-center mt-4">
-            <!-- <button type="submit" class="btn-signup px-5 py-2">
+            <button type="submit" class="btn-signup px-5 py-2">
               <i class="fas fa-sign-in-alt me-2"></i> Login
-            </button> -->
-            <router-link to="/system" class="btn-signup px-5 py-2 text-decoration-none"><i class="fas fa-sign-in-alt me-2"></i> Login</router-link>
+            </button>
           </div>
         </div>
       </form>
@@ -56,8 +55,12 @@
       <!-- Signup Redirect -->
       <p class="text-center mt-4">
         Don’t have an account?
-        <!-- <a href="/signup" class="text-gradient fw-bold">Create one</a> -->
-         <router-link to="/" class="text-gradient fw-bold text-decoration-none">Create one</router-link>
+        <router-link
+          to="/"
+          class="text-gradient fw-bold text-decoration-none"
+        >
+          Create one
+        </router-link>
       </p>
     </div>
   </div>
@@ -65,41 +68,44 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import Swal from "sweetalert2";
+import { useAuthStore } from "../stores/authStore";
 
 export default defineComponent({
-  name: "Login",
+  name: "LoginPage",
   data() {
     return {
       form: {
         email: "",
         password: "",
-        confirmPassword: "",
       },
+      showPassword: false,
     };
   },
   methods: {
-    handleLogin() {
-      if (!this.form.email || !this.form.password || !this.form.confirmPassword) {
-        alert("Please fill in all fields!");
+    async handleLogin() {
+      if (!this.form.email || !this.form.password) {
+        Swal.fire({
+          icon: "warning",
+          title: "Please fill in all fields!",
+        });
         return;
       }
 
-      if (this.form.password !== this.form.confirmPassword) {
-        alert("Passwords do not match!");
-        return;
-      }
+      const authStore = useAuthStore();
 
-      console.log("Login data:", this.form);
-      alert("Login successful!");
+      await authStore.login({
+        email: this.form.email,
+        password: this.form.password,
+      });
     },
   },
 });
 </script>
 
 <style scoped>
-/* === Background === */
 .signup-page {
-  background-color: #1e1633; /* Deep purple */
+  background-color: #1e1633;
   min-height: 100vh;
   padding: 2rem;
   color: #fff;
@@ -108,7 +114,6 @@ export default defineComponent({
   align-items: center;
 }
 
-/* === Card === */
 .signup-card {
   width: 100%;
   max-width: 600px;
@@ -126,14 +131,12 @@ export default defineComponent({
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
 }
 
-/* === Heading === */
 h2 {
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.5px;
 }
 
-/* === Input Fields === */
 .form-control {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -154,13 +157,44 @@ h2 {
   outline: none;
 }
 
-/* === Label === */
+/* ✅ Password toggle styling (purple eye icon) */
+.password-container {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #9b5de5;
+  font-size: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.toggle-password:hover {
+  transform: scale(1.1);
+}
+
+/* ✅ Forgot password link styling */
+.forgot-password {
+  color: #9b5de5;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+  color: #b98af8;
+  text-decoration: underline;
+}
+
 .form-label {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
 }
 
-/* === Button === */
 .btn-signup {
   background: linear-gradient(135deg, #7a5af8 0%, #9b5de5 100%);
   color: #fff;
@@ -179,7 +213,6 @@ h2 {
   transform: translateY(-2px);
 }
 
-/* === Link Text === */
 .text-gradient {
   background: linear-gradient(135deg, #7a5af8, #9b5de5);
   -webkit-background-clip: text;
@@ -191,7 +224,6 @@ h2 {
   opacity: 0.8;
 }
 
-/* === Responsive Styles === */
 @media (max-width: 768px) {
   .signup-card {
     padding: 2rem;
@@ -216,3 +248,4 @@ h2 {
   }
 }
 </style>
+

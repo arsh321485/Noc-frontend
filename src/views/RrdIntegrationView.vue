@@ -28,8 +28,8 @@
                 <router-link to="/system" class="rrd-btn home-btn text-decoration-none">
                     <i class="fas fa-home me-1"></i> Home
                 </router-link>
-                <button class="rrd-btn vlan-btn">
-                    <i class="fas fa-project-diagram me-1"></i> VLAN & Bridge Dashboard
+                <button class="rrd-btn vlan-btn" @click="toggleDashboard">
+                    <i class="fas fa-project-diagram me-1"></i> {{ isVlan ? "VLAN & Bridge Dashboard" : "Interface Dashboard" }}
                 </button>
                 </div>
 
@@ -41,6 +41,7 @@
             </div>
           </div>
 
+          <div v-if="isVlan">
           <div class="rrd-integration-stats mt-4">
             <div class="row g-4">
                 <div
@@ -97,6 +98,66 @@
                 </div>
             </div>
           </div>
+          </div>
+
+          <div v-else>
+          <div class="rrd-integration-stats mt-4">
+            <div class="row g-4">
+                <div
+                class="col-lg-3 col-md-6 col-12"
+                v-for="(card, index) in statsCards2"
+                :key="index"
+                >
+                <div class="rrd-stat-card text-center">
+                    <div class="icon-value">
+                    <i :class="card.icon"></i>
+                    <h3>{{ card.value }}</h3>
+                    </div>
+                    <p>{{ card.label }}</p>
+                </div>
+                </div>
+            </div>
+          </div>
+
+          <div class="rrd-interface-cards mt-4">
+            <div class="row g-4">
+                <div
+                class="col-lg-4 col-md-6 col-12"
+                v-for="(device, index) in devices"
+                :key="index"
+                >
+                <div class="rrd-device-card h-100">
+                    <div class="rrd-card-header">
+                    <div class="icon-box"></div>
+                    <div>
+                        <h5 class="device-name">{{ device.name }}</h5>
+                        <p class="device-info">
+                        <i class="fas fa-globe me-2"></i>{{ device.ip }}<br />
+                        <i class="fas fa-network-wired me-2"></i>{{ device.interfaces }}
+                        </p>
+                    </div>
+                    </div>
+
+                    <!-- Inner Graph Card -->
+                    <div class="rrd-inner-card mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong>{{ device.port }}</strong>
+                        <span :class="['priority', device.priority.toLowerCase()]">
+                        {{ device.priority }}
+                        </span>
+                    </div>
+                    <p class="mb-2">{{ device.portInfo }}</p>
+                    <img
+                        :src="getImagePath(device.graph)"
+                        alt="Graph"
+                        class="graph-img"
+                        />
+                    </div>
+                </div>
+                </div>
+            </div>
+          </div>
+          </div>
 
         </div>
 
@@ -120,6 +181,12 @@ export default {
         { icon: "fas fa-server", value: 8, label: "Total Devices" },
         { icon: "fas fa-network-wired", value: 40, label: "Active Interfaces" },
         { icon: "fas fa-exclamation-triangle", value: 14, label: "High Priority" },
+        { icon: "fas fa-clock", value: "15.41.38", label: "Last Update" },
+      ],
+      statsCards2: [
+        { icon: "fas fa-server", value: 5, label: "Total Devices" },
+        { icon: "fas fa-network-wired", value: 30, label: "Active Interfaces" },
+        { icon: "fas fa-exclamation-triangle", value: 12, label: "High Priority" },
         { icon: "fas fa-clock", value: "15.41.38", label: "Last Update" },
       ],
       devices: [
@@ -151,6 +218,7 @@ export default {
           graph: "graph3.png",
         },
       ],
+      isVlan: true,
     };
   },
    mounted() {
@@ -162,29 +230,14 @@ export default {
     getImagePath(filename) {
       return new URL(`../assets/images/${filename}`, import.meta.url).href;
     },
+    toggleDashboard() {
+      this.isVlan = !this.isVlan;
+    },
   },
 }
 </script>
 
 <style scoped>
-/* .rrd-integration {
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --bg-main: linear-gradient(180deg, #1a1333, #23193d);
-} */
-
-/* ===== Main Container ===== */
-/* .rrd-integration .main-content {
-  margin-left: 85px;
-  overflow-y: auto;
-} */
-
 .rrd-integration .dashboard {
   background: var(--bg-main);
   color: var(--text-primary);

@@ -7,7 +7,7 @@
 
         </div>
         <!-- 🧩 Main Dashboard Section -->
-        <div class=" col-11 main-content">
+        <div class="col-11 main-content">
           <!-- Header -->
           <div class="header row align-items-center mb-4">
             <div class="col-auto">
@@ -43,14 +43,7 @@
               </div>
 
               <div class="col-auto ms-auto">
-                <!-- <button class="refresh-btn" @click="refreshData"><i class="fas fa-sync-alt me-1"></i> Refresh</button> -->
-                 <button
-                    class="refresh-btn"
-                    title="Test Connection"
-                    @click="showAlert('success', 'Refreshing data...')"
-                  >
-                    <i class="fas fa-sync-alt me-1"></i> Refresh
-                  </button>
+                <button class="refresh-btn" @click="refreshData"><i class="fas fa-sync-alt me-1"></i> Refresh</button>
               </div>
             </div>
 
@@ -70,6 +63,12 @@
               </div>
             </div>
           </div>
+          <!-- Floating Alert -->
+              <div v-if="alertMessage" class="topology-alert" :class="alertType">
+                <i :class="alertIcon"></i>
+                <span class="text-light">{{ alertMessage }}</span>
+                <button class="topology-close-btn" @click="closeAlert">×</button>
+              </div>
 
         <!-- Common Table Card -->
         <div class="topology-card p-5 mt-4">
@@ -116,26 +115,23 @@
                 <td>{{ link.uptime }}</td>
                 <td>{{ link.lastUpdated }}</td>
                 <td class="actions">
-  <button
+<button
     class="action-btn green"
-    title="Test Connection"
-    @click="showAlert('success', 'Testing connection...')"
+    @click="testConnection"
   >
     <i class="fas fa-wifi"></i>
   </button>
 
   <button
     class="action-btn yellow"
-    title="Edit Link"
-    @click="showAlert('warning', 'Editing link settings...')"
+    @click="editLink"
   >
     <i class="fas fa-edit"></i>
   </button>
 
   <button
     class="action-btn red"
-    title="Delete Link"
-    @click="showAlert('error', 'Deleting network link...')"
+    @click="confirmDelete"
   >
     <i class="fas fa-trash-alt"></i>
   </button>
@@ -147,27 +143,6 @@
         </div>
         </div>
         </div>
-
-        <!-- Floating Alert -->
-        <div
-        v-if="alert.show"
-        :class="['alert-box', alert.type]"
-        >
-        <i
-            v-if="alert.type === 'success'"
-            class="fas fa-check-circle"
-        ></i>
-        <i
-            v-else-if="alert.type === 'warning'"
-            class="fas fa-exclamation-triangle"
-        ></i>
-        <i
-            v-else
-            class="fas fa-times-circle"
-        ></i>
-        <span>{{ alert.message }}</span>
-        </div>
-
         <!-- End of Dashboard -->
       </div>
     </div>
@@ -177,6 +152,7 @@
 <script>
 import '../assets/main.css'
 import Menu from '@/components/Menu.vue';
+import Swal from "sweetalert2";
 
 export default {
   name: "TopologyLinksView",
@@ -244,6 +220,10 @@ export default {
       type: "",
       message: "",
     },
+    alertMessage: "",
+      alertType: "",
+      alertIcon: "",
+      alertTimeout: null,
     };
   },
   computed: {
@@ -262,31 +242,100 @@ export default {
     setFilter(filter) {
       this.activeFilter = filter;
     },
-    showAlert(type, message) {
-    this.alert.show = true;
-    this.alert.type = type;
-    this.alert.message = message;
-    setTimeout(() => {
-      this.alert.show = false;
-    }, 3000);
-  },
+  showAlert(message, type = "info") {
+      this.alertMessage = message;
+      this.alertType = type;
+      this.alertIcon =
+        type === "success" ? "fas fa-check-circle" : "fas fa-info-circle";
+      clearTimeout(this.alertTimeout);
+      this.alertTimeout = setTimeout(() => {
+        this.alertMessage = "";
+      }, 4000);
+    },
+    closeAlert() {
+      this.alertMessage = "";
+      clearTimeout(this.alertTimeout);
+    },
+    refreshData() {
+      this.showAlert("Refreshing all", "info");
+    },
+    testConnection() {
+      this.showAlert("Testing connection...", "info");
+    },
+    editLink() {
+      this.showAlert("Editing link settings...", "warning");
+    },
+    confirmDelete() {
+      Swal.fire({
+        title: "Are you sure?",
+        text: "Are you sure want to delete network link?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "No",
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        background: "#1c1630", 
+        color: "#fff",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.deleteLink(); 
+        }
+      });
+    },
+    deleteLink() {
+      this.showAlert("Network link deleted", "error");
+    },
   },
 };
 </script>
 
 <style scoped>
-/* .topology {
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --bg-main: linear-gradient(180deg, #1a1333, #23193d);
-} */
+.topology .topology-alert {
+  position: fixed;
+  top: 20px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(40, 40, 60, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  animation: slideIn 0.4s ease forwards;
+}
 
+.topology .topology-alert i {
+  font-size: 18px;
+}
+
+.topology .topology-alert.success {
+  border-left: 5px solid #4caf50;
+}
+
+.topology .topology-alert.info {
+  border-left: 5px solid #2196f3;
+}
+
+.topology .topology-alert.warning {
+  border-left: 5px solid #fbc02d; 
+}
+
+.topology .topology-alert.error {
+  border-left: 5px solid #f44336;
+}
+
+.topology .topology-close-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+  margin-left: 10px;
+}
 
 .topology .dashboard {
   background: var(--bg-main);

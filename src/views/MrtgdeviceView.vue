@@ -29,11 +29,14 @@
                             <h5 class="text-white fw-bold mb-3">
                                 <i class="fas fa-chart-line me-2 text-info"></i> System Overview
                             </h5>
-                            <button class="btn btn-gradient d-flex align-items-center" @click="refreshPage"
-                                :disabled="isRefreshing">
-                                <i class="fas fa-sync-alt me-1" :class="{ 'spin': isRefreshing }"></i>
-                                {{ isRefreshing ? 'Refreshing...' : 'Refresh' }}
+
+
+                            <button class="btn btn-gradient d-flex align-items-center" @click="refreshOverview"
+                                :disabled="isRefreshingOverview">
+                                <i class="fas fa-sync-alt me-1" :class="{ 'spin': isRefreshingOverview }"></i>
+                                {{ isRefreshingOverview ? 'Refreshing...' : 'Refresh' }}
                             </button>
+
                         </div>
 
                         <div class="row g-3">
@@ -56,11 +59,13 @@
                                 <i class="fas fa-server me-2 text-info"></i> SNMP Device Management
                             </h5>
                             <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-gradient d-flex align-items-center" @click="refreshPage"
-                                    :disabled="isRefreshing">
-                                    <i class="fas fa-sync-alt me-1" :class="{ 'spin': isRefreshing }"></i>
-                                    {{ isRefreshing ? 'Refreshing...' : 'Refresh' }}
+
+                                <button class="btn btn-gradient d-flex align-items-center" @click="refreshDevices"
+                                    :disabled="isRefreshingDevices">
+                                    <i class="fas fa-sync-alt me-1" :class="{ 'spin': isRefreshingDevices }"></i>
+                                    {{ isRefreshingDevices ? 'Refreshing...' : 'Refresh' }}
                                 </button>
+
 
                                 <button class="btn btn-success" @click="openAddModal">
                                     <i class="fas fa-plus me-1"></i> Add SNMP Device
@@ -79,7 +84,7 @@
                                         <span class="badge bg-success bg-opacity-75">Monitoring</span>
                                     </div>
                                     <h6 class="text-info">{{ device.ip }}</h6>
-                                    <p class="text-muted small mb-2">
+                                    <p class="text-white small mb-2">
                                         {{ device.active }}/{{ device.total }} Active Interfaces
                                     </p>
 
@@ -103,9 +108,13 @@
                                             <button class="btn btn-sm btn-info text-white px-3">
                                                 <i class="fas fa-eye me-1"></i> View
                                             </button>
-                                            <button class="btn btn-sm btn-warning text-dark px-3">
+                                            
+
+                                            <button class="btn btn-sm btn-warning text-dark px-3"
+                                                @click="openEditModal(device)">
                                                 <i class="fas fa-edit me-1"></i> Edit
                                             </button>
+
                                             <button class="btn btn-sm btn-danger px-3" @click="deleteDevice(device.id)">
                                                 <i class="fas fa-trash-alt me-1"></i> Delete
                                             </button>
@@ -146,7 +155,8 @@
                                         <h6 class="fw-bold text-white mb-0">
                                             <i class="fas fa-chart-line text-info me-2"></i> {{ graph.title }}
                                         </h6>
-                                        <span class="badge bg-warning text-dark text-capitalize">{{ graph.priority }}</span>
+                                        <span class="badge bg-warning text-dark text-capitalize">{{ graph.priority
+                                            }}</span>
                                     </div>
                                     <div class="text-center">
                                         <img :src="graph.image" class="img-fluid rounded-3" alt="SNMP Graph" />
@@ -217,6 +227,60 @@
             </div>
         </div>
 
+        <!-- ✅ Edit SNMP Device Modal -->
+        <div v-if="showEditModal" class="modal-overlay">
+            <div class="modal-content glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="text-white fw-bold">
+                        <i class="fas fa-edit me-2 text-info"></i> Edit SNMP Device
+                    </h4>
+                    <button class="btn btn-secondary btn-sm" @click="closeEditModal">
+                        <i class="fas fa-times me-1"></i> Cancel
+                    </button>
+                </div>
+
+                <form @submit.prevent="updateDevice">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-white">Device Name</label>
+                            <input v-model="editDevice.name" class="form-control" placeholder="Device Name" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white">IP Address</label>
+                            <input v-model="editDevice.ip" class="form-control" placeholder="192.168.x.x" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white">SNMP Community</label>
+                            <input v-model="editDevice.community" class="form-control" placeholder="public" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-white">Device Type</label>
+                            <select v-model="editDevice.type" class="form-select">
+                                <option>Mikrotik Router</option>
+                                <option>Mikrotik Switch</option>
+                                <option>Generic Switch</option>
+                                <option>Cisco Switch</option>
+                                <option>ZTE Switch/Router</option>
+                                <option>Server</option>
+                                <option>Access Point (AP)</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-white">Description</label>
+                            <textarea v-model="editDevice.description" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-start gap-3 mt-4 border-top pt-3">
+                        <button type="submit" class="btn btn-gradient px-4">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
         <!-- Add Interface Modal -->
         <div v-if="showInterfaceModal" class="modal-overlay">
             <div class="modal-content glass-card p-4">
@@ -256,49 +320,31 @@
             </div>
         </div>
         <!-- 🔔 Toast Notification Container -->
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
-  <div
-    v-for="(toast, index) in toasts"
-    :key="index"
-    class="toast align-items-center text-white border-0 show fade"
-    :class="{
-      'bg-success': toast.type === 'success',
-      'bg-danger': toast.type === 'error',
-      'bg-warning': toast.type === 'warning',
-      'bg-info': toast.type === 'info'
-    }"
-  >
-    <div class="d-flex">
-      <div class="toast-body">
-        <i v-if="toast.type === 'success'" class="fas fa-check-circle me-2"></i>
-        <i v-if="toast.type === 'error'" class="fas fa-exclamation-circle me-2"></i>
-        <i v-if="toast.type === 'info'" class="fas fa-info-circle me-2"></i>
-        <i v-if="toast.type === 'warning'" class="fas fa-exclamation-triangle me-2"></i>
-        {{ toast.message }}
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+      <div v-for="(toast, index) in toasts" :key="index" class="modern-toast" :class="toast.type">
+        <div class="toast-left-bar"></div>
+        <div class="toast-content">
+          <i v-if="toast.type === 'success'" class="fas fa-check-circle icon"></i>
+          <i v-if="toast.type === 'error'" class="fas fa-exclamation-circle icon"></i>
+          <i v-if="toast.type === 'info'" class="fas fa-info-circle icon"></i>
+          <i v-if="toast.type === 'warning'" class="fas fa-exclamation-triangle icon"></i>
+          <span class="toast-message">{{ toast.message }}</span>
+        </div>
+        <button class="toast-close" @click="removeToast(index)">×</button>
       </div>
-      <button
-        type="button"
-        class="btn-close btn-close-white me-2 m-auto"
-        @click="removeToast(index)"
-      ></button>
     </div>
-  </div>
-</div>
 
     </main>
 </template>
 
 <script>
+import Swal from 'sweetalert2'
 import '../assets/main.css'
 import Menu from '@/components/Menu.vue';
 
 export default {
-    components: {
-    Menu
-  },
+    components: { Menu },
     data() {
-        
-
         return {
             overview: [
                 { label: "Total Devices", value: 8, icon: "fas fa-hdd" },
@@ -336,8 +382,11 @@ export default {
                     priority: "medium",
                 },
             ],
-            isRefreshing: false,
+            isRefreshingOverview: false,
+            isRefreshingDevices: false,
             showAddModal: false,
+            showEditModal: false,      // controls edit modal visibility
+            editDevice: {},            // holds selected device data for editing
             newDevice: { name: "", ip: "", community: "public", type: "", description: "" },
             showInterfaceModal: false,
             selectedDevice: null,
@@ -346,20 +395,48 @@ export default {
         };
     },
 
+
+
+
     methods: {
         showToast(message, type = "info") {
-  this.toasts.push({ message, type });
-  setTimeout(() => this.toasts.shift(), 4000);
-},
-removeToast(index) {
-  this.toasts.splice(index, 1);
-},
+            this.toasts.push({ message, type });
+            setTimeout(() => this.toasts.shift(), 4000);
+        },
 
-        refreshPage() {
-            this.isRefreshing = true;
+        removeToast(index) {
+            this.toasts.splice(index, 1);
+        },
+
+        // ✅ Refresh only System Overview
+        refreshOverview() {
+            this.isRefreshingOverview = true;
             setTimeout(() => {
-                location.reload();
-            }, 800);
+                // Example: randomize overview values to simulate refresh
+                this.overview = this.overview.map((item) => ({
+                    ...item,
+                    value:
+                        item.label === "Last Update"
+                            ? new Date().toLocaleTimeString()
+                            : Math.floor(Math.random() * 100),
+                }));
+                this.isRefreshingOverview = false;
+                this.showToast("🔄 System Overview Refreshed!", "info");
+            }, 1000);
+        },
+
+        // ✅ Refresh only SNMP Devices
+        refreshDevices() {
+            this.isRefreshingDevices = true;
+            setTimeout(() => {
+                // Example simulation: toggle "active interfaces" values
+                this.devices = this.devices.map((d) => ({
+                    ...d,
+                    active: Math.floor(Math.random() * d.total),
+                }));
+                this.isRefreshingDevices = false;
+                this.showToast("🔄 SNMP Devices Refreshed!", "info");
+            }, 1000);
         },
 
         openAddModal() {
@@ -374,7 +451,7 @@ removeToast(index) {
         },
         addDevice() {
             if (!this.newDevice.name || !this.newDevice.ip || !this.newDevice.type) {
-               this.showToast("⚠️ Please fill all required fields!", "warning");
+                this.showToast("⚠️ Please fill all required fields!", "warning");
                 return;
             }
             this.devices.push({
@@ -384,18 +461,83 @@ removeToast(index) {
                 total: 0,
                 interfaces: [],
             });
-           this.showToast("✅ Device Added Successfully!", "success");
+            this.showToast("✅ Device Added Successfully!", "success");
             this.closeAddModal();
         },
-        // deleteDevice(id) {
-        //     if (confirm("Are you sure you want to delete this device?")) {
+
+        // ✅ Open Edit Modal with Selected Device Data
+        openEditModal(device) {
+            this.editDevice = { ...device };  // clone to avoid instant change
+            this.showEditModal = true;
+        },
+
+        // ✅ Close Edit Modal
+        closeEditModal() {
+            this.showEditModal = false;
+            this.editDevice = {};
+        },
+
+        // ✅ Update Device Details
+        updateDevice() {
+            const index = this.devices.findIndex((d) => d.id === this.editDevice.id);
+            if (index !== -1) {
+                this.devices[index] = { ...this.editDevice };
+                this.showToast("✅ Device Updated Successfully!", "success");
+            }
+            this.closeEditModal();
+        },
+
+
+        // async deleteDevice(id) {
+        //     const result = await Swal.fire({
+        //         title: 'Are you sure?',
+        //         text: "This device will be permanently deleted.",
+        //         icon: 'warning',
+        //         showCancelButton: true,
+        //         confirmButtonColor: '#3085d6',
+        //         cancelButtonColor: '#d33',
+        //         confirmButtonText: 'Yes, delete it!',
+        //         background: '#1e1e2f',
+        //         color: '#fff',
+        //     });
+
+        //     if (result.isConfirmed) {
         //         this.devices = this.devices.filter((d) => d.id !== id);
+        //         Swal.fire({
+        //             toast: true,
+        //             position: 'top-end',
+        //             icon: 'success',
+        //             title: '🗑️ Device deleted successfully!',
+        //             showConfirmButton: false,
+        //             timer: 2500,
+        //             background: '#1e1e2f',
+        //             color: '#fff',
+        //         });
         //     }
         // },
 
-        deleteDevice(id) {
-  this.devices = this.devices.filter((d) => d.id !== id);
-  this.showToast("🗑️ Device deleted successfully!", "error");
+
+        async deleteDevice(id) {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: "This device will be permanently deleted.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    background: '#1e1e2f',
+    color: '#fff',
+  });
+
+  if (result.isConfirmed) {
+    // ✅ Remove the selected device only
+    this.devices = this.devices.filter((d) => d.id !== id);
+
+    // ✅ Show custom toast (same as your notes UI)
+    this.showToast("🗑️ Device deleted successfully!", "error");
+  }
 },
 
         openInterfaceModal(device) {
@@ -418,13 +560,112 @@ removeToast(index) {
             this.closeInterfaceModal();
         },
     },
+
 };
+
 </script>
 
 <style scoped>
 .mrtg-device {
     padding: 30px;
 }
+
+
+/* 🌙 Modern Dark Toast Style */
+.modern-toast {
+  display: flex;
+  align-items: center;
+  position: relative;
+  background: #1e1e2f;
+  color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  min-width: 380px;
+  max-width: 400px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  animation: slideInRight 0.4s ease forwards;
+}
+
+/* 🔵 Colored left bar */
+.toast-left-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 6px;
+  height: 100%;
+  border-radius: 8px 0 0 8px;
+}
+
+.modern-toast.success .toast-left-bar {
+  background-color: #4caf50;
+}
+
+.modern-toast.error .toast-left-bar {
+  background-color: #f44336;
+}
+
+.modern-toast.info .toast-left-bar {
+  background-color: #2196f3;
+}
+
+.modern-toast.warning .toast-left-bar {
+  background-color: #ff9800;
+}
+
+/* Toast content area */
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 14px;
+}
+
+/* Icons */
+.icon {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Message */
+.toast-message {
+  flex: 1;
+  font-weight: 500;
+  color: #fff;
+}
+
+/* Close button */
+.toast-close {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.2rem;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.toast-close:hover {
+  color: #fff;
+}
+
+/* Slide-in animation */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+
 /* Keep your existing CSS as-is */
 .overview-box {
     background: rgba(255, 255, 255, 0.08);
@@ -433,27 +674,28 @@ removeToast(index) {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     transition: 0.3s;
 }
+
 .overview-box:hover {
     transform: translateY(-4px);
     background: rgba(91, 127, 255, 0.12);
 }
-/* .app {
-    background-color: rgb(73, 43, 77);
-    color: #fff;
-    min-height: 100vh;
-} */
+
+
 .text-primary {
     color: #6b82f6 !important;
 }
+
 .btn-gradient {
     background: linear-gradient(90deg, #5b7fff, #4facfe);
     border: none;
     color: #fff;
     transition: 0.3s;
 }
+
 .btn-gradient:hover {
     filter: brightness(1.1);
 }
+
 .glass-card {
     background: rgba(255, 255, 255, 0.04);
     border-radius: 14px;
@@ -461,6 +703,7 @@ removeToast(index) {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     margin-right: 50px;
 }
+
 .device-card {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
@@ -468,14 +711,17 @@ removeToast(index) {
     transition: 0.3s;
     color: #fff;
 }
-.border-secondary{
+
+.border-secondary {
     margin-right: 50px;
 }
+
 .device-card:hover {
     transform: scale(1.03);
     background: rgba(79, 172, 254, 0.1);
     box-shadow: 0 8px 25px rgba(79, 172, 254, 0.2);
 }
+
 .interfaces {
     background: rgba(0, 0, 0, 0.15);
     border-radius: 8px;
@@ -485,27 +731,34 @@ removeToast(index) {
     scrollbar-width: thin;
     scrollbar-color: #5b7fff transparent;
 }
+
 .interface-item {
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.8);
 }
+
 .interface-item:last-child {
     border-bottom: none;
 }
+
 .device-card .btn {
     border: none;
     font-size: 0.85rem;
 }
+
 .device-card .btn-info {
     background: #5b7fff;
 }
+
 .device-card .btn-warning {
     background: #fcd34d;
 }
+
 .device-card .btn-danger {
     background: #ef4444;
 }
+
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -519,32 +772,39 @@ removeToast(index) {
     justify-content: center;
     z-index: 2000;
 }
+
 .modal-content {
     width: 80%;
     max-width: 900px;
     animation: fadeIn 0.4s ease;
 }
+
 @keyframes fadeIn {
     from {
         opacity: 0;
         transform: translateY(-15px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
+
 .spin {
     animation: spin 1s linear infinite;
 }
+
 @keyframes spin {
     from {
         transform: rotate(0deg);
     }
+
     to {
         transform: rotate(360deg);
     }
 }
+
 .monitor-card {
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
@@ -553,14 +813,17 @@ removeToast(index) {
     color: #fff;
     transition: 0.3s;
 }
+
 .monitor-card:hover {
     transform: scale(1.02);
     background: rgba(79, 172, 254, 0.1);
 }
+
 .monitor-card img {
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
 }
+
 .form-select {
     width: auto;
     padding: 0.35rem 1rem;
@@ -568,7 +831,42 @@ removeToast(index) {
     background-color: rgba(16, 41, 63, 0.1);
     color: white;
 }
+
 .form-control {
     background-color: rgba(16, 41, 63, 0.1);
+}
+
+/* 🔧 Fix dropdown background inside modal */
+.modal-content select.form-select {
+    background-color: rgba(30, 30, 50, 0.8) !important;
+    /* dark background to match modal */
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.modal-content select.form-select option {
+    background-color: rgba(25, 25, 40, 0.95) !important;
+    /* dropdown items dark */
+    color: #fff !important;
+}
+
+/* 🔧 Fix SNMP Community field visibility */
+.modal-content input.form-control {
+    background-color: rgba(25, 25, 40, 0.8) !important;
+    color: #fff !important;
+}
+
+.modal-content input.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+    /* visible placeholder */
+}
+
+/* 🔧 Make focus state consistent */
+.modal-content input.form-control:focus,
+.modal-content select.form-select:focus,
+.modal-content textarea.form-control:focus {
+    border-color: #5b7fff !important;
+    box-shadow: 0 0 8px rgba(91, 127, 255, 0.4);
+    outline: none;
 }
 </style>
