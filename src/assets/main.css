@@ -14,9 +14,11 @@
   --text-muted: rgba(255, 255, 255, 0.6);
   --bg-main: linear-gradient(180deg, #1a1333, #23193d);
 }
-
 body {
   background: var(--bg-main);
   color: var(--text-primary);
   font-family: "Poppins", sans-serif;
+}
+.main-content {
+  margin-left: 85px;
 }

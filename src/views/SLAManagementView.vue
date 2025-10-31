@@ -1,14 +1,14 @@
 <template>
   <main>
-    <div class="container-fluid p-0">
-      <div class="row g-0">
+    <div class="container-fluid sla-management">
+      <div class="row me-0">
         <!-- Sidebar -->
-        <div class="col-12 col-md-1 app">
+        <div class="col-1">
             <Menu />
         </div>
 
         <!-- Main -->
-        <div class="col-12 col-md-11 app">
+        <div class="col-11 main-content">
           <!-- 🔹 HEADER -->
           <header class="sla-header d-flex justify-content-between align-items-start flex-wrap px-3 pt-4 pb-3">
             <div>
@@ -576,7 +576,9 @@ export default {
 
 
 <style scoped>
-
+.sla-management {
+  padding: 30px;
+}
 
 .toast {
   opacity: 0;

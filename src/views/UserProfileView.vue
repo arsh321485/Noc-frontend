@@ -2,10 +2,12 @@
     <div class="user-profile">
     <div class="dashboard container-fluid">
       <div class="row me-0">
-        <Menu />
+        <div class="col-1">
+          <Menu />
+        </div>
 
         <!-- 🧩 Main Dashboard Section -->
-        <div class="col-md-11 col-12 main-content">
+        <div class="col-11 main-content">
             <div class="user-profile-header mb-1">
             <div class="user-profile-icon">
             <i class="fas fa-user-circle"></i>
@@ -317,23 +319,8 @@ methods: {
 </script>
 
 <style scoped>
-.user-profile {
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  --glass-shadow-hover: 0 12px 40px rgba(0, 0, 0, 0.4);
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.8);
-  --text-muted: rgba(255, 255, 255, 0.6);
-  --bg-main: linear-gradient(180deg, #1a1333, #23193d);
-}
 
-/* ===== Main Container ===== */
-.user-profile .main-content {
-  margin-left: 90px;
-  overflow-y: auto;
-}
+
 
 .user-profile .dashboard {
   background: var(--bg-main);
@@ -1003,6 +990,9 @@ methods: {
   .info-group label {
     margin-bottom: 4px;
   }
+  /* .main-content {
+    margin-left: 70px;
+  } */
 }
 
 @media (max-width: 576px) {

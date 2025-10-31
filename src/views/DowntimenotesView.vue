@@ -3,12 +3,12 @@
       <div class="downtime-notes">
       <div class="container-fluid p-0">
         <div class="row g-0">
-          <div class="col-1 app" style="min-height: 100vh;">
+          <div class="col-1 app">
             <Menu />
           </div>
 
-          <div class="col-11 app">
-            <div class="main-content">
+          <div class="col-11 main-content">
+          
               <div class="page-header">
                 <h1><i class="fas fa-sticky-note"></i> Downtime Notes</h1>
                 <p class="text-light">Track and manage system downtime incidents and maintenance records</p>
@@ -98,7 +98,7 @@
                   <p>Click “Create Note” to get started!</p>
                 </div>
               </div>
-            </div>
+          
 
             <footer class="site-footer text-center">
               <small>© 2025 IndoBSD | Developed by Ritika Bhikonde</small>
@@ -382,6 +382,10 @@ export default {
 </script>
 
 <style scoped>
+.downtime-notes {
+  padding: 30px;
+}
+
 .toast {
   opacity: 0;
   transform: translateX(100%);

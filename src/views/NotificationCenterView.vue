@@ -2,10 +2,12 @@
     <div class="notification">
     <div class="dashboard container-fluid">
       <div class="row me-0">
-        <Menu />
+        <div class="col-1">
+          <Menu />
+        </div>
 
         <!-- 🧩 Main Dashboard Section -->
-        <div class="col-md-11 col-12 main-content">
+        <div class="col-11 main-content">
             <!-- Notification Header -->
           <div class="notification-header mb-4">
             <div class="notification-icon">
@@ -285,10 +287,7 @@ export default {
 }
 
 /* ===== Main Container ===== */
-.notification .main-content {
-  margin-left: 90px;
-  overflow-y: auto;
-}
+
 
 .notification .dashboard {
   background: var(--bg-main);

@@ -8,7 +8,7 @@
       </div>
 
       <!-- Main content -->
-      <div class="col-11">
+      <div class="col-11 main-content">
         <div class=" py-4">
           <!-- 🔹 Header -->
           <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
@@ -121,11 +121,9 @@ export default defineComponent({
 
 <style scoped>
 /* === PAGE === */
-/* .network-topology {
-  color: #fff;
-  background: radial-gradient(circle at 20% 80%, #1a1733 0%, #241739 40%, #1a1331 100%);
-  min-height: 100vh;
-} */
+.network-topology {
+  padding: 30px;
+}
 
 /* === HEADER === */
 h4 {

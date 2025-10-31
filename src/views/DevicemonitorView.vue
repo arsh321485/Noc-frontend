@@ -4,7 +4,7 @@
       <div class="col-1">
         <Menu />
       </div>
-      <div class="col-11">
+      <div class="col-11 main-content">
         <div class="">
           <!-- 🔹 Page Header -->
           <div class="page-header">
@@ -292,7 +292,9 @@ export default defineComponent({
   color: #e9e6f5;
   font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
 } */
-
+.device-monitoring {
+  padding: 30px;
+}
 /* Header */
 .page-header {
   display: flex;

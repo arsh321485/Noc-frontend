@@ -2,10 +2,12 @@
     <div class="rrd-integration">
     <div class="dashboard container-fluid">
       <div class="row me-0">
-        <Menu />
+        <div class="col-1">
+          <Menu />
+        </div>
 
         <!-- 🧩 Main Dashboard Section -->
-        <div class="col-md-11 col-12 main-content">
+        <div class=" col-11 main-content">
           <div class="rrd-integration-header mb-4 d-flex justify-content-between flex-wrap align-items-start">
             <!-- Left Side -->
             <div class="rrd-header-left">
@@ -23,7 +25,7 @@
             <!-- Right Side -->
             <div class="rrd-right-actions text-end">
                 <div class="d-flex justify-content-end gap-2">
-                <router-link to="/noc-dashboard" class="rrd-btn home-btn text-decoration-none">
+                <router-link to="/system" class="rrd-btn home-btn text-decoration-none">
                     <i class="fas fa-home me-1"></i> Home
                 </router-link>
                 <button class="rrd-btn vlan-btn">
@@ -165,7 +167,7 @@ export default {
 </script>
 
 <style scoped>
-.rrd-integration {
+/* .rrd-integration {
   --glass-bg: rgba(255, 255, 255, 0.08);
   --glass-border: rgba(255, 255, 255, 0.15);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -175,13 +177,13 @@ export default {
   --text-secondary: rgba(255, 255, 255, 0.8);
   --text-muted: rgba(255, 255, 255, 0.6);
   --bg-main: linear-gradient(180deg, #1a1333, #23193d);
-}
+} */
 
 /* ===== Main Container ===== */
-.rrd-integration .main-content {
-  margin-left: 90px;
+/* .rrd-integration .main-content {
+  margin-left: 85px;
   overflow-y: auto;
-}
+} */
 
 .rrd-integration .dashboard {
   background: var(--bg-main);

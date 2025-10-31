@@ -2,10 +2,12 @@
     <div class="web-monitoring">
     <div class="dashboard container-fluid">
       <div class="row me-0">
-        <Menu />
+        <div class="col-1">
+          <Menu />
+        </div>
 
         <!-- 🧩 Main Dashboard Section -->
-        <div class="col-md-11 col-12 main-content">
+        <div class="col-11 main-content">
             <!-- Website Monitoring Header -->
           <div class="web-monitoring-header mb-1">
             <div class="web-monitoring-icon">
@@ -550,11 +552,7 @@ export default {
   --bg-main: linear-gradient(180deg, #1a1333, #23193d);
 }
 
-/* ===== Main Container ===== */
-.web-monitoring .main-content {
-  margin-left: 90px;
-  overflow-y: auto;
-}
+
 
 .web-monitoring .dashboard {
   background: var(--bg-main);

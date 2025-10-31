@@ -1,14 +1,14 @@
 <template>
     <main>
-        <div class="container-fluid p-0">
-            <div class="row g-0">
+        <div class="container-fluid mrtg-device">
+            <div class="row me-0">
                 <!-- Sidebar -->
-                <div class="col-1 app" style="min-height: 100vh;">
+                <div class="col-1">
                     <Menu />
                 </div>
 
                 <!-- Main Content -->
-                <div class="col-11 app p-3">
+                <div class="col-11 main-content">
                     <!-- HEADER -->
                     <header
                         class="d-flex justify-content-between align-items-center flex-wrap py-3 mb-3 border-bottom border-secondary">
@@ -422,6 +422,9 @@ removeToast(index) {
 </script>
 
 <style scoped>
+.mrtg-device {
+    padding: 30px;
+}
 /* Keep your existing CSS as-is */
 .overview-box {
     background: rgba(255, 255, 255, 0.08);
