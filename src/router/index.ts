@@ -13,6 +13,7 @@ import Login from '@/components/Login.vue'
 import SystemView from '@/views/SystemView.vue'
 import NetworktopologyView from '@/views/NetworktopologyView.vue'
 import DevicemonitorView from '@/views/DevicemonitorView.vue'
+import ResetPassword from '@/components/ResetPassword.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,9 +29,14 @@ const router = createRouter({
       component: Login,
     },
     {
-      path: '/forgetpassword',
-      name: 'forgetpassword',
+      path: '/forgotpassword',
+      name: 'forgotpassword',
       component: Forgetpassword,
+    },
+    {
+      path: '/resetpassword',
+      name: 'resetpassword',
+      component: ResetPassword,
     },
     {
       path: '/topology-links',

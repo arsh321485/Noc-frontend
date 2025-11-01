@@ -1,4 +1,3 @@
-// src/stores/authStore.ts
 import { defineStore } from "pinia";
 import endpoint from "../sevices/apiServices";
 import router from "../router";
@@ -14,12 +13,10 @@ interface User {
   role: string;
   created_at: string;
 }
-
 interface Tokens {
   access: string;
   refresh: string;
 }
-
 interface SignupResponse {
   message: string;
   user: User;
@@ -84,6 +81,7 @@ export const useAuthStore = defineStore("auth", {
         router.push("/system");
       } catch (error: any) {
         console.error("Signup error:", error);
+        console.log("🔍 Full error response:", error.response?.data);
 
         Swal.fire({
           icon: "error",
@@ -95,72 +93,130 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-     // ✅ LOGIN FUNCTION
-  
-async login(payload: { email: string; password: string }) {
-  try {
-    const res = await endpoint.post(`/api/users/login/`, {
-      email: payload.email,
-      password: payload.password,
-    });
+    // ✅ LOGIN FUNCTION
+    async login(payload: { email: string; password: string }) {
+    try {
+        const res = await endpoint.post(`/api/users/login/`, {
+        email: payload.email,
+        password: payload.password,
+        });
 
-    const { user, tokens } = res.data;
+        const { user, tokens } = res.data;
 
-    // ✅ Save user and tokens in localStorage
-    localStorage.setItem("user", JSON.stringify(user));
-    localStorage.setItem("accessToken", tokens.access);
-    localStorage.setItem("refreshToken", tokens.refresh);
+        // ✅ Save user and tokens in localStorage
+        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("accessToken", tokens.access);
+        localStorage.setItem("refreshToken", tokens.refresh);
 
-    // ✅ Sync state
-    this.user = user;
-    this.accessToken = tokens.access;
-    this.refreshToken = tokens.refresh;
+        // ✅ Sync state
+        this.user = user;
+        this.accessToken = tokens.access;
+        this.refreshToken = tokens.refresh;
 
-    Swal.fire({
-      icon: "success",
-      title: "Login Successful!",
-      text: `Welcome back, ${user.firstname}!`,
-      timer: 2000,
-      showConfirmButton: false,
-    });
+        Swal.fire({
+        icon: "success",
+        title: "Login Successful!",
+        text: `Welcome back, ${user.firstname}!`,
+        timer: 2000,
+        showConfirmButton: false,
+        });
 
-    // Redirect only after login success
-    router.push("/system");
-  } catch (error: any) {
-    console.error("Login error:", error);
+        // Redirect only after login success
+        router.push("/system");
+    } catch (error: any) {
+        console.error("Login error:", error);
 
-    let errorMessage = "Invalid email or password.";
+        let errorMessage = "Invalid email or password.";
 
-    if (error.response?.data) {
-      if (typeof error.response.data === "string") {
-        errorMessage = error.response.data;
-      } else if (error.response.data.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.response.data.errors) {
-        const errors = error.response.data.errors;
-        errorMessage = Object.values(errors).flat().join("\n");
-      }
+        if (error.response?.data) {
+        if (typeof error.response.data === "string") {
+            errorMessage = error.response.data;
+        } else if (error.response.data.message) {
+            errorMessage = error.response.data.message;
+        } else if (error.response.data.errors) {
+            const errors = error.response.data.errors;
+            errorMessage = Object.values(errors).flat().join("\n");
+        }
+        }
+
+        Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: errorMessage,
+        });
     }
+    },
 
-    Swal.fire({
-      icon: "error",
-      title: "Login Failed",
-      text: errorMessage,
-    });
-  }
-},
+    // ✅ FORGOT PASSWORD FUNCTION
+    async forgotPassword(email: string) {
+    try {
+        const res = await endpoint.post(`/api/users/password/forgot/`, {
+        email,
+        });
+        Swal.fire({
+        icon: "success",
+        title: "Reset Link Sent!",
+        text:
+            res.data?.message ||
+            "If an account with that email exists, a password reset link has been sent.",
+        timer: 2500,
+        showConfirmButton: false,
+        });
 
+        console.log("✅ Forgot password response:", res.data);
+    } catch (error: any) {
+        console.error("Forgot password error:", error);
 
+        Swal.fire({
+        icon: "error",
+        title: "Request Failed",
+        text:
+            error.response?.data?.message ||
+            "Unable to send reset link. Please try again.",
+        });
+    }
+    },
+
+    // ✅ CHANGE PASSWORD FUNCTION (API only, no SweetAlert)
+    async changePassword(payload: {
+      current_password: string;
+      new_password: string;
+      confirm_password: string;
+    }) {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          throw new Error("User not authenticated. Please log in again.");
+        }
+        const res = await endpoint.post(
+          `/api/users/profile/change-password/`,
+          {
+            current_password: payload.current_password,
+            new_password: payload.new_password,
+            confirm_password: payload.confirm_password,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log("✅ Password change response:", res.data.message);
+        return res.data;
+      } catch (error: any) {
+        console.error("❌ Change password error:", error);
+        console.log("🔍 Full error response:", error.response?.data);
+        throw error.response?.data?.message || "Failed to change password.";
+      }
+    },
 
     // ✅ LOGOUT FUNCTION
     async logout() {
       try {
         const refresh = localStorage.getItem("refreshToken");
-
         if (refresh) {
           await endpoint.post(`/api/users/logout/`, { refresh });
         }
-
         localStorage.clear();
         this.user = null;
         this.accessToken = "";

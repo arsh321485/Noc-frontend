@@ -2,37 +2,62 @@
   <div class="forgot-page d-flex justify-content-center align-items-center">
     <div class="forgot-card p-4 p-md-5 shadow-lg">
       <h2 class="text-center mb-4">
-        <i class="fas fa-lock me-2"></i> Forgot Password
+        <i class="fas fa-unlock-alt me-2"></i> Reset Password
       </h2>
 
       <p class="text-center text-muted mb-4">
-        Enter your registered email address and we’ll send you a password reset link.
+        Enter your new password below to reset your account password.
       </p>
 
-      <form @submit.prevent="handleForgotPassword">
-        <!-- Email -->
-        <div class="mb-3">
-          <label class="form-label">Email Address</label>
-          <input
-            v-model="email"
-            type="email"
-            class="form-control"
-            placeholder="Enter your email"
-            required
-          />
+      <form @submit.prevent="handleResetPassword">
+        <!-- New Password -->
+        <div class="mb-3 position-relative">
+          <label class="form-label">New Password</label>
+          <div class="password-container">
+            <input
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              class="form-control pe-5"
+              placeholder="Enter new password"
+              required
+            />
+            <i
+              class="fas"
+              :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+              @click="togglePassword"
+            ></i>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="mb-3 position-relative">
+          <label class="form-label">Confirm Password</label>
+          <div class="password-container">
+            <input
+              v-model="confirmPassword"
+              :type="showConfirmPassword ? 'text' : 'password'"
+              class="form-control pe-5"
+              placeholder="Confirm new password"
+              required
+            />
+            <i
+              class="fas"
+              :class="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"
+              @click="toggleConfirmPassword"
+            ></i>
+          </div>
         </div>
 
         <!-- Submit Button -->
         <div class="text-center mt-4">
           <button type="submit" class="btn-forgot px-5 py-2">
-            <i class="fas fa-paper-plane me-2"></i> Send Reset Link
+            <i class="fas fa-key me-2"></i> Reset Password
           </button>
         </div>
       </form>
 
       <!-- Back to Login -->
       <p class="text-center mt-4">
-        Remember your password?
         <a href="/login" class="text-gradient fw-bold">Back to Login</a>
       </p>
     </div>
@@ -44,19 +69,33 @@ import { defineComponent } from "vue";
 import { useAuthStore } from "../stores/authStore";
 
 export default defineComponent({
-  name: "ForgotPassword",
+  name: "ResetPassword",
   data() {
     return {
-      email: "",
+      password: "",
+      confirmPassword: "",
+      showPassword: false,
+      showConfirmPassword: false,
     };
   },
   methods: {
-    async handleForgotPassword() {
-      if (!this.email) {
-        return alert("Please enter your email address.");
+    togglePassword() {
+      this.showPassword = !this.showPassword;
+    },
+    toggleConfirmPassword() {
+      this.showConfirmPassword = !this.showConfirmPassword;
+    },
+    async handleResetPassword() {
+      if (!this.password || !this.confirmPassword) {
+        return alert("Please fill in all fields.");
       }
+
+      if (this.password !== this.confirmPassword) {
+        return alert("Passwords do not match.");
+      }
+
       const authStore = useAuthStore();
-      await authStore.forgotPassword(this.email);
+    //   await authStore.resetPassword(this.password);
     },
   },
 });
@@ -64,7 +103,7 @@ export default defineComponent({
 
 <style scoped>
 .forgot-page {
-  background-color: #1e1633; 
+  background-color: #1e1633;
   min-height: 100vh;
   padding: 2rem;
   color: #fff;
@@ -123,6 +162,24 @@ h2 {
 .form-label {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.9);
+}
+
+.password-container {
+  position: relative;
+}
+
+.password-container i {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.password-container i:hover {
+  color: #9b5de5;
 }
 
 .btn-forgot {

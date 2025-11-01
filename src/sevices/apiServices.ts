@@ -1,4 +1,3 @@
-// src/services/apiServices.ts
 import axios from "axios";
 import router from "../router";
 import Swal from "sweetalert2";
@@ -12,7 +11,6 @@ const endpoint = axios.create({
   },
 });
 
-// ✅ Automatically attach access token if available
 endpoint.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("accessToken");
@@ -24,7 +22,6 @@ endpoint.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ✅ Handle expired sessions globally
 endpoint.interceptors.response.use(
   (response) => response,
   async (error) => {

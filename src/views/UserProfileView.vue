@@ -148,21 +148,56 @@
 
                     <h5 class="section-title">Security Settings</h5>
 
-                    <div class="form-group">
-                        <label>Current Password:</label>
-                        <input type="password" v-model="passwordData.current" placeholder="Enter current password" />
+                  <div class="form-group">
+                    <label>Current Password:</label>
+                    <div class="password-container">
+                      <input
+                        v-model="passwordData.current"
+                        :type="showCurrentPassword ? 'text' : 'password'"
+                        placeholder="Enter current password"
+                        class="form-control"
+                      />
+                      <i
+                        :class="showCurrentPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                        class="toggle-password"
+                        @click="showCurrentPassword = !showCurrentPassword"
+                      ></i>
                     </div>
+                  </div>
 
-                    <div class="form-group">
-                        <label>New Password:</label>
-                        <input type="password" v-model="passwordData.newPass" placeholder="Enter new password" />
+                  <div class="form-group">
+                    <label>New Password:</label>
+                    <div class="password-container">
+                      <input
+                        v-model="passwordData.newPass"
+                        :type="showNewPassword ? 'text' : 'password'"
+                        placeholder="Enter new password"
+                        class="form-control"
+                      />
+                      <i
+                        :class="showNewPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                        class="toggle-password"
+                        @click="showNewPassword = !showNewPassword"
+                      ></i>
                     </div>
+                  </div>
 
-                    <div class="form-group">
-                        <label>Confirm New Password:</label>
-                        <input type="password" v-model="passwordData.confirmPass" placeholder="Confirm new password" />
+                  <div class="form-group">
+                    <label>Confirm New Password:</label>
+                    <div class="password-container">
+                      <input
+                        v-model="passwordData.confirmPass"
+                        :type="showConfirmPassword ? 'text' : 'password'"
+                        placeholder="Confirm new password"
+                        class="form-control"
+                      />
+                      <i
+                        :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                        class="toggle-password"
+                        @click="showConfirmPassword = !showConfirmPassword"
+                      ></i>
                     </div>
-
+                  </div>
                     <!-- Floating Alert -->
         <div v-if="alertMessage" class="user-profile-alert" :class="alertType">
           <i :class="alertIcon"></i>
@@ -254,6 +289,7 @@
 
 <script>
 import Menu from '@/components/Menu.vue';
+import { useAuthStore } from "../stores/authStore";
 
 export default {
   name: "UserProfileView",
@@ -275,6 +311,9 @@ export default {
       newPass: "",
       confirmPass: ""
     },
+    showCurrentPassword: false,
+    showNewPassword: false,
+    showConfirmPassword: false,
     showSessionModal: false,
     sessionData: {
       active: 0,
@@ -325,20 +364,54 @@ methods: {
   closeChangePassModal() {
     this.showChangePassModal = false;
   },
-  savePassword() {
+  // savePassword() {
+  // if (!this.passwordData.current || !this.passwordData.newPass || !this.passwordData.confirmPass) {
+  //   this.showAlert("Please fill all password fields.", "info");
+  //   return;
+  // }
+  // if (this.passwordData.newPass !== this.passwordData.confirmPass) {
+  //   this.showAlert("Passwords do not match!", "error");
+  //   return;
+  // }
+  // this.showAlert("Password changed successfully!", "success");
+  // setTimeout(() => {
+  //   this.showChangePassModal = false;
+  // }, 1000);
+  // },
+  async savePassword() {
   if (!this.passwordData.current || !this.passwordData.newPass || !this.passwordData.confirmPass) {
     this.showAlert("Please fill all password fields.", "info");
     return;
   }
+
   if (this.passwordData.newPass !== this.passwordData.confirmPass) {
     this.showAlert("Passwords do not match!", "error");
     return;
   }
-  this.showAlert("Password changed successfully!", "success");
-  setTimeout(() => {
-    this.showChangePassModal = false;
-  }, 1000);
-  },
+
+  try {
+    const authStore = useAuthStore();
+
+    const response = await authStore.changePassword({
+      current_password: this.passwordData.current,
+      new_password: this.passwordData.newPass,
+      confirm_password: this.passwordData.confirmPass,
+    });
+
+    console.log("✅ Password changed successfully:", response);
+
+    // ✅ Show frontend alert here
+    this.showAlert("Password changed successfully!", "success");
+
+    // ✅ Optionally close modal after a short delay
+    setTimeout(() => {
+      this.showChangePassModal = false;
+    }, 1000);
+  } catch (error) {
+    console.error("❌ Change password failed:", error);
+    this.showAlert(error || "Failed to change password.", "error");
+  }
+},
   openSessionModal() {
     this.showSessionModal = true;
   },
@@ -403,6 +476,28 @@ methods: {
   font-size: 18px;
   cursor: pointer;
   margin-left: 10px;
+}
+
+.password-container {
+  position: relative;
+}
+
+.password-container input {
+  width: 100%;
+  padding-right: 40px; /* space for eye icon */
+}
+
+.password-container .toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #777;
+}
+
+.password-container .toggle-password:hover {
+  color: #333;
 }
 
 .user-profile .dashboard {

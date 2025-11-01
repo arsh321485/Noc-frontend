@@ -39,7 +39,7 @@
 
             <!-- ✅ Forgot Password Link -->
             <div class="text-end mt-2">
-              <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+              <a href="/forgotpassword" class="forgot-password">Forgot Password?</a>
             </div>
           </div>
 
